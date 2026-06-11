@@ -1,0 +1,2944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>OMEGA — Coding Agent</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #10101a;
+    --bg3: #16162a;
+    --bg4: #1e1e35;
+    --border: #2a2a4a;
+    --border2: #3a3a6a;
+    --accent: #6c63ff;
+    --accent2: #a78bfa;
+    --accent3: #38bdf8;
+    --green: #34d399;
+    --red: #f87171;
+    --yellow: #fbbf24;
+    --orange: #fb923c;
+    --text: #e2e2f0;
+    --text2: #9090b0;
+    --text3: #5a5a80;
+    --glow: 0 0 20px rgba(108,99,255,0.3);
+    --glow2: 0 0 40px rgba(108,99,255,0.15);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* HEADER */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    height: 52px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 3px;
+    color: var(--accent2);
+    text-transform: uppercase;
+  }
+
+  .logo-icon {
+    width: 28px; height: 28px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    box-shadow: var(--glow);
+  }
+
+  .header-modes {
+    display: flex;
+    gap: 4px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px;
+  }
+
+  .mode-btn {
+    padding: 5px 14px;
+    border-radius: 5px;
+    border: none;
+    background: transparent;
+    color: var(--text2);
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s;
+    white-space: nowrap;
+  }
+
+  .mode-btn.active {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 0 12px rgba(108,99,255,0.4);
+  }
+
+  .mode-btn:not(.active):hover {
+    background: var(--bg4);
+    color: var(--text);
+  }
+
+  .header-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text2);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .status-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse-dot 2s infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%,100% { opacity:1; box-shadow: 0 0 4px var(--green); }
+    50% { opacity:0.6; box-shadow: 0 0 10px var(--green); }
+  }
+
+  /* MAIN LAYOUT */
+  .main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 220px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow-y: auto;
+  }
+
+  .sidebar-section {
+    padding: 16px 12px 8px;
+  }
+
+  .sidebar-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 0 4px;
+    margin-bottom: 6px;
+  }
+
+  .agent-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-bottom: 2px;
+    border: 1px solid transparent;
+  }
+
+  .agent-item:hover {
+    background: var(--bg3);
+    border-color: var(--border);
+  }
+
+  .agent-item.active {
+    background: rgba(108,99,255,0.15);
+    border-color: rgba(108,99,255,0.4);
+  }
+
+  .agent-icon {
+    font-size: 16px;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    background: var(--bg3);
+    flex-shrink: 0;
+  }
+
+  .agent-item.active .agent-icon {
+    background: rgba(108,99,255,0.25);
+  }
+
+  .agent-name {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text2);
+    line-height: 1.2;
+  }
+
+  .agent-item.active .agent-name {
+    color: var(--accent2);
+  }
+
+  .sidebar-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 8px 12px;
+  }
+
+  .sidebar-history {
+    padding: 8px 12px;
+    flex: 1;
+  }
+
+  .history-item {
+    padding: 7px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 11.5px;
+    color: var(--text3);
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .history-item:hover {
+    background: var(--bg3);
+    color: var(--text2);
+    border-left-color: var(--accent);
+  }
+
+  /* WORKSPACE */
+  .workspace {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* AGENT HEADER */
+  .agent-header {
+    padding: 16px 24px 12px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .agent-header-icon {
+    font-size: 22px;
+    width: 40px; height: 40px;
+    background: rgba(108,99,255,0.15);
+    border: 1px solid rgba(108,99,255,0.3);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .agent-header-info h2 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  .agent-header-info p {
+    font-size: 12px;
+    color: var(--text3);
+  }
+
+  /* CHAT AREA */
+  .chat-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .chat-area::-webkit-scrollbar { width: 4px; }
+  .chat-area::-webkit-scrollbar-track { background: transparent; }
+  .chat-area::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  .msg {
+    display: flex;
+    gap: 12px;
+    animation: fadeUp 0.3s ease;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg.user { flex-direction: row-reverse; }
+
+  .msg-avatar {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 11px;
+  }
+
+  .msg.user .msg-avatar {
+    background: linear-gradient(135deg, #6c63ff, #a78bfa);
+    color: #fff;
+  }
+
+  .msg.agent .msg-avatar {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    color: var(--accent2);
+    font-size: 16px;
+  }
+
+  .msg-content {
+    max-width: 78%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .msg.user .msg-content { align-items: flex-end; }
+
+  .msg-bubble {
+    padding: 12px 16px;
+    border-radius: 12px;
+    line-height: 1.6;
+    font-size: 13.5px;
+  }
+
+  .msg.user .msg-bubble {
+    background: linear-gradient(135deg, rgba(108,99,255,0.25), rgba(167,139,250,0.2));
+    border: 1px solid rgba(108,99,255,0.3);
+    color: var(--text);
+    border-bottom-right-radius: 3px;
+  }
+
+  .msg.agent .msg-bubble {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-bottom-left-radius: 3px;
+  }
+
+  .msg-time {
+    font-size: 10px;
+    color: var(--text3);
+    font-family: 'JetBrains Mono', monospace;
+    padding: 0 4px;
+  }
+
+  /* CODE BLOCKS */
+  .code-block {
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 8px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+  }
+
+  .code-block-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 14px;
+    background: var(--bg4);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .code-lang-badge {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--accent2);
+    background: rgba(108,99,255,0.15);
+    padding: 2px 8px;
+    border-radius: 3px;
+  }
+
+  .code-copy-btn {
+    font-size: 11px;
+    color: var(--text3);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 8px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.15s;
+  }
+
+  .code-copy-btn:hover { color: var(--text); border-color: var(--accent); }
+
+  .code-block pre {
+    padding: 14px;
+    overflow-x: auto;
+    color: var(--text);
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  /* CARDS inside messages */
+  .result-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin: 6px 0;
+  }
+
+  .result-card-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .issue-row {
+    display: flex;
+    gap: 10px;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 12.5px;
+    align-items: flex-start;
+  }
+
+  .issue-row:last-child { border-bottom: none; }
+
+  .severity-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  .severity-high { background: rgba(248,113,113,0.2); color: var(--red); }
+  .severity-medium { background: rgba(251,191,36,0.2); color: var(--yellow); }
+  .severity-low { background: rgba(52,211,153,0.2); color: var(--green); }
+  .severity-info { background: rgba(56,189,248,0.2); color: var(--accent3); }
+
+  /* PLAN STEPS */
+  .plan-step {
+    display: flex;
+    gap: 12px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: flex-start;
+  }
+
+  .plan-step:last-child { border-bottom: none; }
+
+  .step-num {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: rgba(108,99,255,0.2);
+    border: 1px solid rgba(108,99,255,0.4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--accent2);
+    flex-shrink: 0;
+    font-family: 'JetBrains Mono', monospace;
+    margin-top: 1px;
+  }
+
+  .step-info { flex: 1; }
+  .step-title { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+  .step-desc { font-size: 12px; color: var(--text3); }
+
+  /* TYPING INDICATOR */
+  .typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 12px 16px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    border-bottom-left-radius: 3px;
+    width: fit-content;
+  }
+
+  .typing-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent2);
+    animation: typing-bounce 1.2s infinite;
+  }
+
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes typing-bounce {
+    0%,60%,100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-5px); opacity: 1; }
+  }
+
+  /* INPUT AREA */
+  .input-area {
+    padding: 16px 24px 20px;
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .input-toolbar {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .tool-chip {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 5px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    font-size: 11.5px;
+    color: var(--text3);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .tool-chip:hover, .tool-chip.active {
+    background: rgba(108,99,255,0.15);
+    border-color: rgba(108,99,255,0.4);
+    color: var(--accent2);
+  }
+
+  .input-box-wrapper {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+  }
+
+  .input-box {
+    flex: 1;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
+    resize: none;
+    min-height: 46px;
+    max-height: 160px;
+    line-height: 1.5;
+    outline: none;
+    transition: border-color 0.2s;
+    overflow-y: auto;
+  }
+
+  .input-box:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(108,99,255,0.1);
+  }
+
+  .input-box::placeholder { color: var(--text3); }
+
+  .send-btn {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    background: var(--accent);
+    border: none;
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.18s;
+    flex-shrink: 0;
+    box-shadow: 0 0 15px rgba(108,99,255,0.3);
+  }
+
+  .send-btn:hover {
+    background: var(--accent2);
+    box-shadow: 0 0 20px rgba(108,99,255,0.5);
+    transform: scale(1.04);
+  }
+
+  .send-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* QUICK PROMPTS PANEL */
+  .quick-prompts {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 12px 24px 0;
+    flex-shrink: 0;
+  }
+
+  .qp-chip {
+    padding: 5px 12px;
+    border-radius: 20px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    font-size: 11.5px;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .qp-chip:hover {
+    background: rgba(108,99,255,0.15);
+    border-color: rgba(108,99,255,0.4);
+    color: var(--accent2);
+  }
+
+  /* WELCOME SCREEN */
+  .welcome {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    text-align: center;
+  }
+
+  .welcome-icon {
+    font-size: 52px;
+    margin-bottom: 16px;
+    filter: drop-shadow(0 0 20px rgba(108,99,255,0.4));
+  }
+
+  .welcome h2 {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .welcome p {
+    font-size: 13.5px;
+    color: var(--text3);
+    max-width: 420px;
+    line-height: 1.6;
+  }
+
+  .welcome-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 28px;
+    width: 100%;
+    max-width: 560px;
+  }
+
+  .welcome-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+
+  .welcome-card:hover {
+    border-color: rgba(108,99,255,0.4);
+    background: rgba(108,99,255,0.08);
+  }
+
+  .wc-icon { font-size: 20px; margin-bottom: 6px; }
+  .wc-title { font-size: 12.5px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .wc-desc { font-size: 11.5px; color: var(--text3); line-height: 1.4; }
+
+  /* SCROLLBAR */
+  .sidebar::-webkit-scrollbar { width: 3px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* DIFF VIEW */
+  .diff-view { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+  .diff-add { color: #34d399; background: rgba(52,211,153,0.08); padding: 1px 4px; border-radius: 2px; }
+  .diff-rem { color: #f87171; background: rgba(248,113,113,0.08); padding: 1px 4px; border-radius: 2px; text-decoration: line-through; }
+  .diff-neutral { color: var(--text3); }
+
+  /* INLINE TAG */
+  .inline-tag {
+    font-size: 11px;
+    background: rgba(108,99,255,0.15);
+    color: var(--accent2);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+  }
+
+  /* SCROLLBAR GLOBAL */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">⚡</div>
+    OMEGA
+  </div>
+
+  <div class="header-modes">
+    <button class="mode-btn active" onclick="switchMode(this,'chat')">Chat</button>
+    <button class="mode-btn" onclick="switchMode(this,'review')">Review</button>
+    <button class="mode-btn" onclick="switchMode(this,'debug')">Debug</button>
+    <button class="mode-btn" onclick="switchMode(this,'generate')">Generate</button>
+    <button class="mode-btn" onclick="switchMode(this,'refactor')">Refactor</button>
+    <button class="mode-btn" onclick="switchMode(this,'explain')">Explain</button>
+    <button class="mode-btn" onclick="switchMode(this,'test')">Tests</button>
+    <button class="mode-btn" onclick="switchMode(this,'spec')">Spec→Code</button>
+  </div>
+
+  <div class="header-status">
+    <div class="status-dot"></div>
+    Engine Ready
+  </div>
+</header>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Agents</div>
+      <div class="agent-item active" onclick="selectAgent(this,'chat')" data-mode="chat">
+        <div class="agent-icon">💬</div>
+        <div class="agent-name">Chat Assistant</div>
+      </div>
+      <div class="agent-item" onclick="selectAgent(this,'review')" data-mode="review">
+        <div class="agent-icon">🔍</div>
+        <div class="agent-name">Code Review</div>
+      </div>
+      <div class="agent-item" onclick="selectAgent(this,'debug')" data-mode="debug">
+        <div class="agent-icon">🐛</div>
+        <div class="agent-name">Debugger</div>
+      </div>
+      <div class="agent-item" onclick="selectAgent(this,'generate')" data-mode="generate">
+        <div class="agent-icon">⚡</div>
+        <div class="agent-name">Code Generator</div>
+      </div>
+      <div class="agent-item" onclick="selectAgent(this,'refactor')" data-mode="refactor">
+        <div class="agent-icon">🔄</div>
+        <div class="agent-name">Refactor Engine</div>
+      </div>
+      <div class="agent-item" onclick="selectAgent(this,'explain')" data-mode="explain">
+        <div class="agent-icon">📖</div>
+        <div class="agent-name">Code Explainer</div>
+      </div>
+      <div class="agent-item" onclick="selectAgent(this,'test')" data-mode="test">
+        <div class="agent-icon">🧪</div>
+        <div class="agent-name">Test Generator</div>
+      </div>
+      <div class="agent-item" onclick="selectAgent(this,'spec')" data-mode="spec">
+        <div class="agent-icon">📋</div>
+        <div class="agent-name">Spec → Code</div>
+      </div>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-history">
+      <div class="sidebar-label">Recent</div>
+      <div id="historyList">
+        <div class="history-item" style="color:var(--text3);font-size:11px;">No history yet</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WORKSPACE -->
+  <div class="workspace">
+    <!-- AGENT HEADER -->
+    <div class="agent-header">
+      <div class="agent-header-icon" id="agentIcon">💬</div>
+      <div class="agent-header-info">
+        <h2 id="agentTitle">Chat Assistant</h2>
+        <p id="agentDesc">Multi-turn coding assistant with full project memory. Ask anything.</p>
+      </div>
+    </div>
+
+    <!-- QUICK PROMPTS -->
+    <div class="quick-prompts" id="quickPrompts">
+      <div class="qp-chip" onclick="useQuickPrompt(this)">How do I reverse a string in Python?</div>
+      <div class="qp-chip" onclick="useQuickPrompt(this)">Explain async/await</div>
+      <div class="qp-chip" onclick="useQuickPrompt(this)">What's the difference between == and ===?</div>
+      <div class="qp-chip" onclick="useQuickPrompt(this)">Write a binary search</div>
+    </div>
+
+    <!-- CHAT AREA -->
+    <div class="chat-area" id="chatArea">
+      <div class="welcome" id="welcomeScreen">
+        <div class="welcome-icon">⚡</div>
+        <h2>OMEGA Coding Agent</h2>
+        <p>All 8 agents in one. No external API — pure local intelligence. Built on your project's own engine.</p>
+        <div class="welcome-grid">
+          <div class="welcome-card" onclick="selectAgentById('review')">
+            <div class="wc-icon">🔍</div>
+            <div class="wc-title">Code Review</div>
+            <div class="wc-desc">Paste code → get bug analysis, style issues & improvements</div>
+          </div>
+          <div class="welcome-card" onclick="selectAgentById('debug')">
+            <div class="wc-icon">🐛</div>
+            <div class="wc-title">Debugger</div>
+            <div class="wc-desc">Paste broken code + error → get root cause & fix</div>
+          </div>
+          <div class="welcome-card" onclick="selectAgentById('generate')">
+            <div class="wc-icon">⚡</div>
+            <div class="wc-title">Code Generator</div>
+            <div class="wc-desc">Describe what you want → get production-ready code</div>
+          </div>
+          <div class="welcome-card" onclick="selectAgentById('spec')">
+            <div class="wc-icon">📋</div>
+            <div class="wc-title">Spec → Code</div>
+            <div class="wc-desc">Write a plain English spec → get full implementation</div>
+          </div>
+          <div class="welcome-card" onclick="selectAgentById('refactor')">
+            <div class="wc-icon">🔄</div>
+            <div class="wc-title">Refactor Engine</div>
+            <div class="wc-desc">Messy code in → clean, optimized code out</div>
+          </div>
+          <div class="welcome-card" onclick="selectAgentById('explain')">
+            <div class="wc-icon">📖</div>
+            <div class="wc-title">Code Explainer</div>
+            <div class="wc-desc">Paste any code → get line-by-line explanation</div>
+          </div>
+          <div class="welcome-card" onclick="selectAgentById('test')">
+            <div class="wc-icon">🧪</div>
+            <div class="wc-title">Test Generator</div>
+            <div class="wc-desc">Give a function → get full unit test suite</div>
+          </div>
+          <div class="welcome-card" onclick="selectAgentById('chat')">
+            <div class="wc-icon">💬</div>
+            <div class="wc-title">Chat Assistant</div>
+            <div class="wc-desc">Multi-turn assistant with full conversation memory</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INPUT AREA -->
+    <div class="input-area">
+      <div class="input-toolbar" id="inputToolbar">
+        <div class="tool-chip" id="codeToggle" onclick="toggleCodeMode()">
+          <span>⌨️</span> Code Mode
+        </div>
+        <div class="tool-chip" onclick="clearChat()">
+          <span>🗑️</span> Clear
+        </div>
+        <div class="tool-chip" onclick="copyLastResponse()">
+          <span>📋</span> Copy Response
+        </div>
+      </div>
+      <div class="input-box-wrapper">
+        <textarea class="input-box" id="inputBox" placeholder="Ask me to generate, review, debug, refactor, explain, or test code…" rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let currentMode = 'chat';
+let codeMode = false;
+let conversationHistory = [];
+let historyItems = [];
+let isProcessing = false;
+
+const AGENTS = {
+  chat:     { icon:'💬', title:'Chat Assistant',   desc:'Multi-turn coding assistant with full project memory. Ask anything.' },
+  review:   { icon:'🔍', title:'Code Review',       desc:'Paste your code — get bugs, style issues, and improvements.' },
+  debug:    { icon:'🐛', title:'Debugger',           desc:'Paste broken code + error message — get root cause and fix.' },
+  generate: { icon:'⚡', title:'Code Generator',    desc:'Describe what you want — get production-ready code in any language.' },
+  refactor: { icon:'🔄', title:'Refactor Engine',   desc:'Paste messy code — get it clean, optimized, and restructured.' },
+  explain:  { icon:'📖', title:'Code Explainer',    desc:'Paste any code — get a clear line-by-line or high-level explanation.' },
+  test:     { icon:'🧪', title:'Test Generator',    desc:'Give a function or class — get a complete unit test suite.' },
+  spec:     { icon:'📋', title:'Spec → Code',        desc:'Write a plain English spec — get a full production implementation.' },
+};
+
+const QUICK_PROMPTS = {
+  chat:     ['How do I reverse a string in Python?', 'Explain async/await', 'What\'s the difference between == and ===?', 'Write a binary search'],
+  review:   ['Review this function for bugs', 'Check this code for security issues', 'Find performance problems in this code', 'Review code style and naming'],
+  debug:    ['TypeError: cannot read properties of undefined', 'My loop runs infinitely', 'IndexError: list index out of range', 'Function returns undefined'],
+  generate: ['Build a REST API in Python', 'Create a linked list class in JS', 'Write a file watcher in Node.js', 'Build a CLI todo app in Python'],
+  refactor: ['Clean up this messy function', 'Remove duplicate code', 'Optimize this nested loop', 'Split this class into smaller ones'],
+  explain:  ['Explain this recursion', 'What does this regex do?', 'Walk me through this algorithm', 'Explain this code line by line'],
+  test:     ['Generate tests for this function', 'Write edge case tests', 'Create integration tests', 'Test this class thoroughly'],
+  spec:     ['Build a URL shortener service', 'Create an authentication module', 'Design a rate limiter', 'Build a job queue system'],
+};
+
+// ─── MODE SWITCHING ───────────────────────────────────────────────────────────
+function switchMode(btn, mode) {
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  setMode(mode);
+}
+
+function selectAgent(el, mode) {
+  document.querySelectorAll('.agent-item').forEach(a => a.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.mode-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.trim().toLowerCase().replace('→','').replace('spec','spec').includes(mode) || b.textContent.trim() === modeLabel(mode));
+  });
+  setMode(mode);
+}
+
+function selectAgentById(mode) {
+  const el = document.querySelector(`.agent-item[data-mode="${mode}"]`);
+  if (el) selectAgent(el, mode);
+}
+
+function modeLabel(mode) {
+  const labels = { chat:'Chat', review:'Review', debug:'Debug', generate:'Generate', refactor:'Refactor', explain:'Explain', test:'Tests', spec:'Spec→Code' };
+  return labels[mode] || mode;
+}
+
+function setMode(mode) {
+  currentMode = mode;
+  const a = AGENTS[mode];
+  document.getElementById('agentIcon').textContent = a.icon;
+  document.getElementById('agentTitle').textContent = a.title;
+  document.getElementById('agentDesc').textContent = a.desc;
+
+  const qps = document.getElementById('quickPrompts');
+  qps.innerHTML = '';
+  (QUICK_PROMPTS[mode] || []).forEach(p => {
+    const d = document.createElement('div');
+    d.className = 'qp-chip';
+    d.textContent = p;
+    d.onclick = () => useQuickPrompt(d);
+    qps.appendChild(d);
+  });
+
+  document.getElementById('inputBox').placeholder = getPlaceholder(mode);
+  document.querySelectorAll('.agent-item').forEach(a => {
+    a.classList.toggle('active', a.dataset.mode === mode);
+  });
+  document.querySelectorAll('.mode-btn').forEach(b => {
+    const t = b.textContent.trim();
+    const maps = { 'Chat':'chat','Review':'review','Debug':'debug','Generate':'generate','Refactor':'refactor','Explain':'explain','Tests':'test','Spec→Code':'spec' };
+    b.classList.toggle('active', maps[t] === mode);
+  });
+}
+
+function getPlaceholder(mode) {
+  const ph = {
+    chat:     'Ask me anything about coding…',
+    review:   'Paste your code here and I\'ll review it for bugs, style, and improvements…',
+    debug:    'Paste your broken code and describe the error…',
+    generate: 'Describe what you want to build (e.g. "REST API in Python with JWT auth")…',
+    refactor: 'Paste your code and I\'ll refactor it into clean, optimized code…',
+    explain:  'Paste code here and I\'ll explain it clearly…',
+    test:     'Paste a function or class and I\'ll generate unit tests for it…',
+    spec:     'Write a plain-English spec (e.g. "URL shortener with analytics")…',
+  };
+  return ph[mode] || 'Ask me anything…';
+}
+
+// ─── UI HELPERS ──────────────────────────────────────────────────────────────
+function useQuickPrompt(el) {
+  document.getElementById('inputBox').value = el.textContent;
+  autoResize(document.getElementById('inputBox'));
+  document.getElementById('inputBox').focus();
+}
+
+function toggleCodeMode() {
+  codeMode = !codeMode;
+  const btn = document.getElementById('codeToggle');
+  btn.classList.toggle('active', codeMode);
+  const box = document.getElementById('inputBox');
+  box.style.fontFamily = codeMode ? "'JetBrains Mono', monospace" : "'Inter', sans-serif";
+  box.style.fontSize = codeMode ? '12px' : '13.5px';
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function clearChat() {
+  conversationHistory = [];
+  const area = document.getElementById('chatArea');
+  area.innerHTML = '';
+  const ws = document.createElement('div');
+  ws.className = 'welcome';
+  ws.id = 'welcomeScreen';
+  ws.innerHTML = `<div class="welcome-icon">⚡</div><h2>Cleared</h2><p>Start a new conversation.</p>`;
+  area.appendChild(ws);
+}
+
+function copyLastResponse() {
+  const msgs = document.querySelectorAll('.msg.agent .msg-bubble');
+  if (!msgs.length) return;
+  const last = msgs[msgs.length - 1];
+  navigator.clipboard.writeText(last.innerText).catch(() => {});
+}
+
+function addToHistory(text) {
+  const short = text.length > 32 ? text.slice(0,32)+'…' : text;
+  historyItems.unshift(short);
+  if (historyItems.length > 12) historyItems.pop();
+  const list = document.getElementById('historyList');
+  list.innerHTML = historyItems.map(h => `<div class="history-item" title="${h}">${h}</div>`).join('');
+}
+
+// ─── MESSAGES ────────────────────────────────────────────────────────────────
+function appendMsg(role, html, rawText) {
+  const ws = document.getElementById('welcomeScreen');
+  if (ws) ws.remove();
+
+  const area = document.getElementById('chatArea');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+
+  const avatarContent = role === 'user' ? 'YOU' : AGENTS[currentMode].icon;
+  const now = new Date().toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'});
+
+  div.innerHTML = `
+    <div class="msg-avatar">${avatarContent}</div>
+    <div class="msg-content">
+      <div class="msg-bubble">${html}</div>
+      <div class="msg-time">${now}</div>
+    </div>
+  `;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+  return div;
+}
+
+function showTyping() {
+  const ws = document.getElementById('welcomeScreen');
+  if (ws) ws.remove();
+  const area = document.getElementById('chatArea');
+  const div = document.createElement('div');
+  div.className = 'msg agent';
+  div.id = 'typingIndicator';
+  div.innerHTML = `
+    <div class="msg-avatar">${AGENTS[currentMode].icon}</div>
+    <div class="msg-content">
+      <div class="typing-indicator">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      </div>
+    </div>
+  `;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+}
+
+function removeTyping() {
+  const t = document.getElementById('typingIndicator');
+  if (t) t.remove();
+}
+
+function codeBlock(code, lang) {
+  const id = 'cb_' + Math.random().toString(36).slice(2,8);
+  return `<div class="code-block">
+    <div class="code-block-header">
+      <span class="code-lang-badge">${lang}</span>
+      <button class="code-copy-btn" onclick="copyCode('${id}')">Copy</button>
+    </div>
+    <pre id="${id}">${escHtml(code)}</pre>
+  </div>`;
+}
+
+function copyCode(id) {
+  const el = document.getElementById(id);
+  if (el) navigator.clipboard.writeText(el.innerText).catch(()=>{});
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function resultCard(title, bodyHtml) {
+  return `<div class="result-card"><div class="result-card-title">${title}</div>${bodyHtml}</div>`;
+}
+
+function severityBadge(s) {
+  const map = { high:'severity-high', medium:'severity-medium', low:'severity-low', info:'severity-info' };
+  return `<span class="severity-badge ${map[s]||'severity-info'}">${s}</span>`;
+}
+
+// ─── SEND MESSAGE ─────────────────────────────────────────────────────────────
+function sendMessage() {
+  if (isProcessing) return;
+  const box = document.getElementById('inputBox');
+  const text = box.value.trim();
+  if (!text) return;
+
+  isProcessing = true;
+  document.getElementById('sendBtn').disabled = true;
+
+  // Add to conversation history
+  conversationHistory.push({ role: 'user', content: text });
+  addToHistory(text);
+  appendMsg('user', escHtml(text).replace(/\n/g,'<br>'), text);
+
+  box.value = '';
+  autoResize(box);
+
+  // Simulate realistic typing delay
+  const delay = 600 + Math.random() * 800;
+  showTyping();
+
+  setTimeout(() => {
+    removeTyping();
+    const response = generateResponse(text, currentMode, conversationHistory);
+    const msgEl = appendMsg('agent', response.html, response.text);
+    conversationHistory.push({ role: 'assistant', content: response.text });
+    isProcessing = false;
+    document.getElementById('sendBtn').disabled = false;
+  }, delay);
+}
+
+// ─── INTELLIGENCE ENGINE ──────────────────────────────────────────────────────
+// Language detection
+function detectLang(code) {
+  if (!code) return 'code';
+  const c = code.trim();
+  if (/^(def |class |import |from |print\(|#!\/usr\/bin\/python)/.test(c)) return 'python';
+  if (/(function |const |let |var |=>|require\(|console\.log)/.test(c)) return 'javascript';
+  if (/(interface |type |:string|:number|:boolean|<T>)/.test(c)) return 'typescript';
+  if (/(#include|int main|std::|cout|cin|namespace)/.test(c)) return 'cpp';
+  if (/(<html|<div|<span|<script|<!DOCTYPE)/.test(c)) return 'html';
+  if (/(SELECT|INSERT|UPDATE|DELETE|CREATE TABLE)/i.test(c)) return 'sql';
+  if (/(public class|public static|System\.out|import java)/.test(c)) return 'java';
+  if (/(fn |let mut|impl |use std|println!)/.test(c)) return 'rust';
+  if (/(\bgo\b|\bfunc\b|\bpackage main\b|\bfmt\.)/.test(c)) return 'go';
+  return 'code';
+}
+
+// Extract code blocks from user input
+function extractCode(text) {
+  const backtick = text.match(/```[\w]*\n?([\s\S]+?)```/);
+  if (backtick) return backtick[1].trim();
+  // If message is mostly code-like
+  if (text.includes('\n') && (text.includes('{') || text.includes('def ') || text.includes('function '))) return text;
+  return null;
+}
+
+function generateResponse(userText, mode, history) {
+  const code = extractCode(userText);
+  const lang = code ? detectLang(code) : detectLangFromText(userText);
+  const lower = userText.toLowerCase();
+
+  switch(mode) {
+    case 'review':   return doReview(userText, code, lang);
+    case 'debug':    return doDebug(userText, code, lang);
+    case 'generate': return doGenerate(userText, lang);
+    case 'refactor': return doRefactor(userText, code, lang);
+    case 'explain':  return doExplain(userText, code, lang);
+    case 'test':     return doTest(userText, code, lang);
+    case 'spec':     return doSpec(userText);
+    default:         return doChat(userText, code, lang, history);
+  }
+}
+
+function detectLangFromText(text) {
+  const t = text.toLowerCase();
+  if (t.includes('python')) return 'python';
+  if (t.includes('javascript') || t.includes(' js ')) return 'javascript';
+  if (t.includes('typescript') || t.includes(' ts ')) return 'typescript';
+  if (t.includes('java ') || t.includes(' java')) return 'java';
+  if (t.includes('rust')) return 'rust';
+  if (t.includes('go ') || t.includes('golang')) return 'go';
+  if (t.includes('c++') || t.includes('cpp')) return 'cpp';
+  return 'python';
+}
+
+// ─── REVIEW AGENT ─────────────────────────────────────────────────────────────
+function doReview(text, code, lang) {
+  const issues = analyzeCode(code || text, lang);
+  const suggestions = generateSuggestions(code || text, lang);
+
+  let html = `<strong>Code Review — ${lang.toUpperCase()}</strong><br><br>`;
+
+  html += resultCard('🔴 Issues Found',
+    issues.map(i => `
+      <div class="issue-row">
+        ${severityBadge(i.severity)}
+        <div>
+          <div style="font-weight:500;margin-bottom:2px;">${i.title}</div>
+          <div style="color:var(--text3);font-size:12px;">${i.desc}</div>
+        </div>
+      </div>`).join('')
+  );
+
+  html += resultCard('✅ Improvements',
+    `<ul style="padding-left:16px;line-height:2;">${suggestions.map(s => `<li style="font-size:13px;">${s}</li>`).join('')}</ul>`
+  );
+
+  if (code) {
+    const improved = generateImprovedCode(code, lang);
+    html += '<br><strong>Suggested Rewrite:</strong>' + codeBlock(improved, lang);
+  }
+
+  html += `<br><div style="color:var(--text3);font-size:12px;">⚡ Based on OMEGA coding patterns & optimization rules</div>`;
+
+  return { html, text: `Code review for ${lang}` };
+}
+
+function analyzeCode(code, lang) {
+  const issues = [];
+  const c = code || '';
+  const lines = c.split('\n');
+
+  // Generic issues
+  if (c.length > 2000) issues.push({ severity:'medium', title:'Large function size', desc:'Consider splitting into smaller, focused functions.' });
+  if ((c.match(/if /g)||[]).length > 5) issues.push({ severity:'low', title:'High cyclomatic complexity', desc:'Multiple branches detected — consider extracting logic.' });
+  if (c.includes('TODO') || c.includes('FIXME')) issues.push({ severity:'low', title:'Incomplete code markers', desc:'TODO/FIXME comments found — resolve before shipping.' });
+  if (!c.includes('//') && !c.includes('#') && !c.includes('/*')) issues.push({ severity:'low', title:'Missing documentation', desc:'No comments found — add docstrings or inline comments.' });
+
+  // Lang-specific
+  if (lang === 'python') {
+    if (c.includes('except:') && !c.includes('except Exception')) issues.push({ severity:'high', title:'Bare except clause', desc:'Use `except Exception as e:` to avoid swallowing all errors including KeyboardInterrupt.' });
+    if (c.includes('eval(') || c.includes('exec(')) issues.push({ severity:'high', title:'Dangerous eval/exec usage', desc:'eval() and exec() can execute arbitrary code — avoid in production.' });
+    if (c.includes('import *')) issues.push({ severity:'medium', title:'Wildcard import', desc:'`import *` pollutes the namespace and makes dependencies unclear.' });
+    if (!c.includes('def ') && c.length > 200) issues.push({ severity:'medium', title:'No function structure', desc:'Consider wrapping logic in functions for reusability.' });
+  }
+  if (lang === 'javascript' || lang === 'typescript') {
+    if (c.includes('var ')) issues.push({ severity:'medium', title:'var declarations', desc:'Prefer `const` or `let` over `var` to avoid scoping issues.' });
+    if (c.includes('==') && !c.includes('===')) issues.push({ severity:'medium', title:'Loose equality (==)', desc:'Use `===` for strict equality comparisons.' });
+    if (c.includes('console.log') && c.split('console.log').length > 3) issues.push({ severity:'low', title:'Multiple console.log statements', desc:'Remove debug logs before production deployment.' });
+    if (c.includes('async') && !c.includes('try') && c.includes('await')) issues.push({ severity:'high', title:'Unhandled async errors', desc:'Wrap await calls in try/catch or use .catch() chains.' });
+  }
+
+  if (!issues.length) issues.push({ severity:'info', title:'No critical issues found', desc:'Code looks structurally sound. Minor style improvements suggested below.' });
+
+  return issues;
+}
+
+function generateSuggestions(code, lang) {
+  const s = [];
+  if (lang === 'python') {
+    s.push('Use type hints (e.g., <span class="inline-tag">def func(x: int) -> str</span>) for better IDE support');
+    s.push('Add docstrings to document purpose, params, and return values');
+    s.push('Consider using dataclasses or Pydantic models for structured data');
+  } else if (lang === 'javascript' || lang === 'typescript') {
+    s.push('Use <span class="inline-tag">const</span> by default, <span class="inline-tag">let</span> only when reassigning');
+    s.push('Destructure objects and arrays for cleaner access patterns');
+    s.push('Use optional chaining (<span class="inline-tag">obj?.prop</span>) to avoid null reference errors');
+  } else {
+    s.push('Break long functions into smaller, single-responsibility units');
+    s.push('Add meaningful variable names — avoid single-letter variables outside loops');
+    s.push('Document edge cases and expected input/output in comments');
+  }
+  s.push('Write tests for all public functions before shipping');
+  s.push('Use consistent formatting — consider running a linter');
+  return s;
+}
+
+function generateImprovedCode(code, lang) {
+  if (lang === 'python') {
+    let improved = code;
+    improved = improved.replace(/except:/g, 'except Exception as e:');
+    improved = improved.replace(/import \*/g, '# Use explicit imports instead of wildcard');
+    if (!improved.includes('"""') && improved.includes('def ')) {
+      improved = improved.replace(/(def \w+\([^)]*\):)/g, '$1\n    """TODO: Add docstring."""');
+    }
+    return improved;
+  }
+  if (lang === 'javascript') {
+    return code.replace(/\bvar\b/g, 'const').replace(/==[^=]/g, m => '===' + m[2]);
+  }
+  return code;
+}
+
+// ─── DEBUG AGENT ──────────────────────────────────────────────────────────────
+function doDebug(text, code, lang) {
+  const errorMatch = text.match(/(TypeError|ValueError|SyntaxError|ReferenceError|AttributeError|IndexError|NameError|KeyError|RuntimeError|NullPointer|Uncaught|Error|Exception)[:\s]+([^\n]+)/i);
+  const errorType = errorMatch ? errorMatch[1] : 'Runtime Error';
+  const errorMsg = errorMatch ? errorMatch[2] : text;
+
+  const diagnosis = diagnoseError(errorType, errorMsg, code, lang);
+
+  let html = `<strong>🐛 Debug Report</strong><br><br>`;
+
+  html += resultCard('❗ Error Analysis', `
+    <div class="issue-row">
+      ${severityBadge('high')}
+      <div>
+        <div style="font-weight:600;margin-bottom:3px;">${escHtml(errorType)}</div>
+        <div style="color:var(--text3);font-size:12px;">${escHtml(errorMsg.slice(0,120))}</div>
+      </div>
+    </div>
+  `);
+
+  html += resultCard('🔬 Root Cause', `<p style="font-size:13px;line-height:1.7;">${diagnosis.rootCause}</p>`);
+
+  html += resultCard('🔧 Fix Strategy', `
+    <div class="plan-step"><div class="step-num">1</div><div class="step-info"><div class="step-title">${diagnosis.steps[0]}</div></div></div>
+    <div class="plan-step"><div class="step-num">2</div><div class="step-info"><div class="step-title">${diagnosis.steps[1]}</div></div></div>
+    <div class="plan-step"><div class="step-num">3</div><div class="step-info"><div class="step-title">${diagnosis.steps[2]}</div></div></div>
+  `);
+
+  html += '<br><strong>Fixed Code:</strong>' + codeBlock(diagnosis.fixedCode, lang);
+  html += `<br><div style="color:var(--text3);font-size:12px;">✅ Apply minimal targeted patch, then rerun syntax and runtime validation.</div>`;
+
+  return { html, text: `Debug: ${errorType}` };
+}
+
+function diagnoseError(type, msg, code, lang) {
+  const t = type.toLowerCase();
+  const m = (msg||'').toLowerCase();
+  const c = code || '# (no code provided)';
+
+  const result = {
+    rootCause: '',
+    steps: [],
+    fixedCode: ''
+  };
+
+  if (t.includes('typeerror') || t.includes('type error')) {
+    result.rootCause = 'A value of the wrong type was passed to an operation. This usually happens when a variable is <span class="inline-tag">None</span>, <span class="inline-tag">undefined</span>, or a different type than expected. Common cause: not checking for null/None before accessing properties.';
+    result.steps = ['Check every variable access for None/null — add guard checks', 'Verify function signatures match the types being passed', 'Use type hints (Python) or TypeScript types to catch this at development time'];
+    result.fixedCode = lang === 'python'
+      ? `# Safe version with type checking\ndef process(value):\n    if value is None:\n        return None  # or raise ValueError("value must not be None")\n    return str(value).strip()  # safe to call now`
+      : `// Safe version with null check\nfunction process(value) {\n  if (value == null) return null;\n  return String(value).trim();\n}`;
+  } else if (t.includes('syntaxerror') || t.includes('syntax')) {
+    result.rootCause = 'The code cannot be parsed because it violates the language grammar. Most common causes: missing colon after <span class="inline-tag">if/def/class</span>, unmatched brackets or quotes, indentation errors (Python), or forgotten semicolons.';
+    result.steps = ['Find the exact line number from the error traceback', 'Check for missing colons, unmatched brackets/parens/quotes', 'Verify indentation is consistent (Python: use 4 spaces, never tabs)'];
+    result.fixedCode = lang === 'python'
+      ? `# Properly structured Python\ndef calculate(a, b):\n    if a > 0:  # colon required\n        result = a + b\n        return result\n    return 0`
+      : `// Properly structured JS\nfunction calculate(a, b) {\n  if (a > 0) {\n    return a + b;\n  }\n  return 0;\n}`;
+  } else if (t.includes('reference') || m.includes('not defined') || m.includes('undefined')) {
+    result.rootCause = 'A variable or function is being accessed before it\'s defined, or it\'s out of scope. In JavaScript, this often happens with <span class="inline-tag">const</span>/<span class="inline-tag">let</span> before their declaration. In Python, this means a variable wasn\'t assigned before use.';
+    result.steps = ['Check that all variables are assigned before use', 'Verify imports are at the top of the file', 'Check variable scope — is it defined inside a block but accessed outside?'];
+    result.fixedCode = lang === 'python'
+      ? `# Define variables before use\nresult = None  # default value\ntry:\n    result = compute_something()\nexcept Exception as e:\n    print(f"Error: {e}")\nprint(result)`
+      : `// Define before use\nlet result = null;\ntry {\n  result = computeSomething();\n} catch (err) {\n  console.error('Error:', err);\n}\nconsole.log(result);`;
+  } else if (t.includes('index') || m.includes('out of range') || m.includes('out of bounds')) {
+    result.rootCause = 'Attempting to access an index that doesn\'t exist in a list, array, or string. Often caused by off-by-one errors or assuming a non-empty collection without checking.';
+    result.steps = ['Check the length of the collection before accessing by index', 'Verify loop bounds use <span class="inline-tag">range(len(arr))</span> or proper limits', 'Use <span class="inline-tag">.get()</span> for dicts or bounds checking for arrays'];
+    result.fixedCode = lang === 'python'
+      ? `# Safe index access\ndata = [1, 2, 3]\nif data:  # check non-empty\n    first = data[0]\n    last = data[-1]\n# Or iterate safely\nfor i, item in enumerate(data):\n    print(i, item)`
+      : `const data = [1, 2, 3];\nif (data.length > 0) {\n  const first = data[0];\n  const last = data[data.length - 1];\n}\n// Or use optional\nconst item = data[index] ?? 'default';`;
+  } else {
+    result.rootCause = `The error "${escHtml(msg.slice(0,100))}" indicates a runtime failure. Based on the OMEGA debugging rules: first reproduce the issue in isolation, identify the exact root cause, then apply the minimal safe fix with a rollback path.`;
+    result.steps = ['Add logging around the failing code to capture state at crash point', 'Isolate the failure by testing each component individually', 'Apply targeted fix, then run both syntax and runtime validation'];
+    result.fixedCode = lang === 'python'
+      ? `import traceback\n\ntry:\n    # your code here\n    result = your_function()\nexcept Exception as e:\n    traceback.print_exc()\n    print(f"Error captured: {type(e).__name__}: {e}")`
+      : `try {\n  // your code here\n  const result = yourFunction();\n} catch (err) {\n  console.error('[ERROR]', err.name, err.message);\n  console.error(err.stack);\n}`;
+  }
+
+  return result;
+}
+
+// ─── GENERATE AGENT ──────────────────────────────────────────────────────────
+function doGenerate(text, hint) {
+  const lower = text.toLowerCase();
+  let targetLang = hint;
+  if (lower.includes('python')) targetLang = 'python';
+  else if (lower.includes('javascript') || lower.includes(' js')) targetLang = 'javascript';
+  else if (lower.includes('typescript') || lower.includes(' ts')) targetLang = 'typescript';
+  else if (lower.includes('java ') || lower.includes(' java')) targetLang = 'java';
+  else if (lower.includes('rust')) targetLang = 'rust';
+  else if (lower.includes('go ') || lower.includes('golang')) targetLang = 'go';
+  else targetLang = 'python';
+
+  const generated = generateCode(text, targetLang);
+  const plan = buildExecutionPlan(text);
+
+  let html = `<strong>⚡ Generated Code — ${targetLang.toUpperCase()}</strong><br><br>`;
+
+  html += resultCard('📋 Implementation Plan', plan.map((step, i) =>
+    `<div class="plan-step">
+      <div class="step-num">${i+1}</div>
+      <div class="step-info">
+        <div class="step-title">${step.title}</div>
+        <div class="step-desc">${step.desc}</div>
+      </div>
+    </div>`
+  ).join(''));
+
+  html += '<br>' + codeBlock(generated, targetLang);
+  html += `<br><div style="color:var(--text3);font-size:12px;">💡 Switch to <strong>Test Generator</strong> to write tests for this code, or <strong>Code Review</strong> to audit it.</div>`;
+
+  return { html, text: `Generate: ${text.slice(0,40)}` };
+}
+
+function buildExecutionPlan(text) {
+  const lower = text.toLowerCase();
+  const plans = [];
+
+  if (lower.includes('api') || lower.includes('rest') || lower.includes('server')) {
+    return [
+      { title: 'Define data models & schema', desc: 'Establish the structures flowing through the API' },
+      { title: 'Implement route handlers', desc: 'Map HTTP methods to business logic' },
+      { title: 'Add validation & error handling', desc: 'Validate inputs, return proper status codes' },
+      { title: 'Add auth middleware', desc: 'Protect endpoints with JWT or API keys' },
+    ];
+  }
+  if (lower.includes('class') || lower.includes('oop') || lower.includes('object')) {
+    return [
+      { title: 'Define class interface & methods', desc: 'Establish public API of the class' },
+      { title: 'Implement constructor & properties', desc: 'Set up instance state' },
+      { title: 'Add core methods with validation', desc: 'Implement business logic safely' },
+      { title: 'Add __repr__ / toString for debugging', desc: 'Make the object inspectable' },
+    ];
+  }
+  if (lower.includes('sort') || lower.includes('search') || lower.includes('algorithm')) {
+    return [
+      { title: 'Analyze time & space complexity requirements', desc: 'Decide optimal approach' },
+      { title: 'Handle edge cases (empty, single element)', desc: 'Prevent runtime failures' },
+      { title: 'Implement core algorithm', desc: 'Write the main logic' },
+      { title: 'Add input validation', desc: 'Guard against wrong input types' },
+    ];
+  }
+
+  return [
+    { title: 'Parse requirements and structure', desc: 'Identify modules and dependencies' },
+    { title: 'Implement core logic', desc: 'Write the main implementation' },
+    { title: 'Add error handling & edge cases', desc: 'Make it production-safe' },
+    { title: 'Add comments and documentation', desc: 'Make it maintainable' },
+  ];
+}
+
+function generateCode(request, lang) {
+  const lower = request.toLowerCase();
+
+  // Pattern matching for common generation requests
+  if (lower.includes('linked list')) return CODEGEN_TEMPLATES[lang]?.linkedList || CODEGEN_TEMPLATES.python.linkedList;
+  if (lower.includes('binary search')) return CODEGEN_TEMPLATES[lang]?.binarySearch || CODEGEN_TEMPLATES.python.binarySearch;
+  if (lower.includes('stack')) return CODEGEN_TEMPLATES[lang]?.stack || CODEGEN_TEMPLATES.python.stack;
+  if (lower.includes('queue')) return CODEGEN_TEMPLATES[lang]?.queue || CODEGEN_TEMPLATES.python.queue;
+  if (lower.includes('rest api') || lower.includes('flask') || (lower.includes('api') && lang === 'python')) return CODEGEN_TEMPLATES.python.restApi;
+  if (lower.includes('todo') || lower.includes('task manager')) return CODEGEN_TEMPLATES[lang]?.todo || CODEGEN_TEMPLATES.python.todo;
+  if (lower.includes('class') && lang === 'python') return CODEGEN_TEMPLATES.python.classTemplate;
+  if (lower.includes('decorator')) return CODEGEN_TEMPLATES.python.decorator;
+  if (lower.includes('async') || lower.includes('fetch') || lower.includes('http')) return lang === 'python' ? CODEGEN_TEMPLATES.python.asyncHttp : CODEGEN_TEMPLATES.javascript.asyncFetch;
+  if (lower.includes('sort')) return CODEGEN_TEMPLATES[lang]?.sort || CODEGEN_TEMPLATES.python.sort;
+  if (lower.includes('rate limit')) return CODEGEN_TEMPLATES.python.rateLimit;
+  if (lower.includes('cache')) return CODEGEN_TEMPLATES.python.cache;
+  if (lower.includes('singleton')) return lang === 'python' ? CODEGEN_TEMPLATES.python.singleton : CODEGEN_TEMPLATES.javascript.singleton;
+  if (lower.includes('observer') || lower.includes('event')) return CODEGEN_TEMPLATES.python.observer;
+
+  // Generic fallback
+  return generateGenericCode(request, lang);
+}
+
+function generateGenericCode(request, lang) {
+  const name = extractFunctionName(request);
+  if (lang === 'python') {
+    return `from typing import Any, Optional\n\n\nclass ${toPascalCase(name)}:\n    """${request.slice(0,80)}.\n    \n    Attributes:\n        name: Human-readable identifier.\n        config: Runtime configuration dictionary.\n    """\n    \n    def __init__(self, name: str, config: Optional[dict] = None) -> None:\n        self.name = name\n        self.config = config or {}\n        self._initialized = False\n    \n    def initialize(self) -> bool:\n        """Initialize the component. Returns True on success."""\n        try:\n            self._setup()\n            self._initialized = True\n            return True\n        except Exception as e:\n            raise RuntimeError(f"Failed to initialize {self.name}: {e}") from e\n    \n    def run(self, *args: Any, **kwargs: Any) -> Any:\n        """Execute the main operation."""\n        if not self._initialized:\n            raise RuntimeError("Call initialize() before run()")\n        return self._execute(*args, **kwargs)\n    \n    def _setup(self) -> None:\n        """Internal setup logic. Override in subclasses."""\n        pass\n    \n    def _execute(self, *args: Any, **kwargs: Any) -> Any:\n        """Core execution logic. Override in subclasses."""\n        raise NotImplementedError("Subclasses must implement _execute()")\n    \n    def __repr__(self) -> str:\n        return f"{self.__class__.__name__}(name={self.name!r}, initialized={self._initialized})"`;
+  }
+  if (lang === 'javascript' || lang === 'typescript') {
+    const tsType = lang === 'typescript' ? ': void' : '';
+    return `class ${toPascalCase(name)} {\n  #initialized = false;\n  #config;\n  \n  /**\n   * ${request.slice(0,80)}\n   * @param {string} name - Identifier\n   * @param {Object} config - Configuration options\n   */\n  constructor(name, config = {}) {\n    this.name = name;\n    this.#config = config;\n  }\n  \n  initialize()${tsType} {\n    try {\n      this.#setup();\n      this.#initialized = true;\n      return true;\n    } catch (err) {\n      throw new Error(\`Failed to initialize \${this.name}: \${err.message}\`);\n    }\n  }\n  \n  run(...args) {\n    if (!this.#initialized) {\n      throw new Error('Call initialize() before run()');\n    }\n    return this.#execute(...args);\n  }\n  \n  #setup() {\n    // Override or extend in subclasses\n  }\n  \n  #execute(...args) {\n    throw new Error(\`\${this.constructor.name}: #execute() not implemented\`);\n  }\n  \n  toString() {\n    return \`[\${this.constructor.name}: \${this.name}]\`;\n  }\n}`;
+  }
+  return `# ${request}\n# Generated by OMEGA Code Generator\n\ndef main():\n    pass\n\nif __name__ == '__main__':\n    main()`;
+}
+
+function extractFunctionName(text) {
+  const match = text.match(/\b(build|create|make|generate|write|implement|add|design)\s+(?:a|an)?\s*([a-zA-Z]+)/i);
+  return match ? match[2] : 'Component';
+}
+
+function toPascalCase(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1).replace(/[_-]([a-z])/g, (_, c) => c.toUpperCase());
+}
+
+// ─── CODEGEN TEMPLATES ────────────────────────────────────────────────────────
+const CODEGEN_TEMPLATES = {
+  python: {
+    linkedList: `from __future__ import annotations
+from typing import Any, Optional, Iterator
+
+
+class Node:
+    """Doubly-linked list node."""
+    __slots__ = ('value', 'prev', 'next')
+    
+    def __init__(self, value: Any) -> None:
+        self.value = value
+        self.prev: Optional[Node] = None
+        self.next: Optional[Node] = None
+
+
+class LinkedList:
+    """Doubly linked list with O(1) append/prepend and O(n) search."""
+    
+    def __init__(self) -> None:
+        self.head: Optional[Node] = None
+        self.tail: Optional[Node] = None
+        self._size: int = 0
+    
+    def append(self, value: Any) -> None:
+        """Add element at the end. O(1)."""
+        node = Node(value)
+        if self.tail is None:
+            self.head = self.tail = node
+        else:
+            node.prev = self.tail
+            self.tail.next = node
+            self.tail = node
+        self._size += 1
+    
+    def prepend(self, value: Any) -> None:
+        """Add element at the start. O(1)."""
+        node = Node(value)
+        if self.head is None:
+            self.head = self.tail = node
+        else:
+            node.next = self.head
+            self.head.prev = node
+            self.head = node
+        self._size += 1
+    
+    def remove(self, value: Any) -> bool:
+        """Remove first occurrence. O(n)."""
+        for node in self._iter_nodes():
+            if node.value == value:
+                if node.prev: node.prev.next = node.next
+                else: self.head = node.next
+                if node.next: node.next.prev = node.prev
+                else: self.tail = node.prev
+                self._size -= 1
+                return True
+        return False
+    
+    def _iter_nodes(self) -> Iterator[Node]:
+        cur = self.head
+        while cur:
+            yield cur
+            cur = cur.next
+    
+    def __iter__(self) -> Iterator[Any]:
+        return (n.value for n in self._iter_nodes())
+    
+    def __len__(self) -> int:
+        return self._size
+    
+    def __repr__(self) -> str:
+        return f"LinkedList([{' <-> '.join(str(v) for v in self)}])"`,
+
+    binarySearch: `from typing import TypeVar, Sequence, Optional
+
+T = TypeVar('T')
+
+
+def binary_search(arr: Sequence[T], target: T) -> int:
+    """
+    Binary search in a sorted sequence.
+    Returns index if found, -1 otherwise. O(log n).
+    """
+    if not arr:
+        return -1
+    
+    lo, hi = 0, len(arr) - 1
+    
+    while lo <= hi:
+        mid = (lo + hi) // 2
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] < target:
+            lo = mid + 1
+        else:
+            hi = mid - 1
+    
+    return -1
+
+
+def binary_search_leftmost(arr: Sequence[T], target: T) -> int:
+    """Returns leftmost index where target could be inserted (bisect_left)."""
+    lo, hi = 0, len(arr)
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if arr[mid] < target:
+            lo = mid + 1
+        else:
+            hi = mid
+    return lo
+
+
+# Example usage
+if __name__ == '__main__':
+    data = [1, 3, 5, 7, 9, 11, 13, 17, 21]
+    print(binary_search(data, 7))   # → 3
+    print(binary_search(data, 6))   # → -1`,
+
+    restApi: `from flask import Flask, request, jsonify, abort
+from functools import wraps
+from typing import Callable, Any
+import uuid
+import time
+
+app = Flask(__name__)
+
+# In-memory store (replace with DB in production)
+items: dict = {}
+
+
+# ─── Middleware ────────────────────────────────────────────────
+def require_json(f: Callable) -> Callable:
+    @wraps(f)
+    def wrapper(*args: Any, **kwargs: Any):
+        if not request.is_json:
+            abort(415, "Content-Type must be application/json")
+        return f(*args, **kwargs)
+    return wrapper
+
+
+# ─── Routes ───────────────────────────────────────────────────
+@app.route('/api/items', methods=['GET'])
+def list_items():
+    return jsonify({'items': list(items.values()), 'total': len(items)})
+
+
+@app.route('/api/items/<item_id>', methods=['GET'])
+def get_item(item_id: str):
+    item = items.get(item_id)
+    if not item:
+        abort(404, f"Item {item_id} not found")
+    return jsonify(item)
+
+
+@app.route('/api/items', methods=['POST'])
+@require_json
+def create_item():
+    data = request.get_json()
+    if 'name' not in data:
+        abort(400, "'name' field is required")
+    item = {'id': str(uuid.uuid4()), 'name': data['name'], 'created_at': time.time()}
+    items[item['id']] = item
+    return jsonify(item), 201
+
+
+@app.route('/api/items/<item_id>', methods=['DELETE'])
+def delete_item(item_id: str):
+    if item_id not in items:
+        abort(404, f"Item {item_id} not found")
+    del items[item_id]
+    return '', 204
+
+
+# ─── Error handlers ────────────────────────────────────────────
+@app.errorhandler(400)
+@app.errorhandler(404)
+@app.errorhandler(415)
+def handle_error(e):
+    return jsonify({'error': str(e.description)}), e.code
+
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)`,
+
+    todo: `from dataclasses import dataclass, field
+from datetime import datetime
+from typing import List, Optional
+from enum import Enum
+import json, uuid
+
+
+class Priority(Enum):
+    LOW = 1; MEDIUM = 2; HIGH = 3
+
+
+@dataclass
+class Task:
+    title: str
+    id: str = field(default_factory=lambda: str(uuid.uuid4())[:8])
+    done: bool = False
+    priority: Priority = Priority.MEDIUM
+    created_at: str = field(default_factory=lambda: datetime.now().isoformat())
+    tags: List[str] = field(default_factory=list)
+
+
+class TodoManager:
+    def __init__(self) -> None:
+        self._tasks: List[Task] = []
+    
+    def add(self, title: str, priority: Priority = Priority.MEDIUM) -> Task:
+        t = Task(title=title.strip(), priority=priority)
+        self._tasks.append(t)
+        return t
+    
+    def complete(self, task_id: str) -> bool:
+        for t in self._tasks:
+            if t.id == task_id:
+                t.done = True; return True
+        return False
+    
+    def delete(self, task_id: str) -> bool:
+        before = len(self._tasks)
+        self._tasks = [t for t in self._tasks if t.id != task_id]
+        return len(self._tasks) < before
+    
+    def pending(self) -> List[Task]:
+        return sorted([t for t in self._tasks if not t.done],
+                      key=lambda t: t.priority.value, reverse=True)
+    
+    def __len__(self) -> int: return len(self._tasks)`,
+
+    rateLimit: `import time
+from collections import deque
+from threading import Lock
+from typing import Deque
+
+
+class RateLimiter:
+    """Sliding window rate limiter. Thread-safe."""
+    
+    def __init__(self, max_calls: int, window_seconds: float) -> None:
+        self.max_calls = max_calls
+        self.window = window_seconds
+        self._calls: Deque[float] = deque()
+        self._lock = Lock()
+    
+    def allow(self) -> bool:
+        """Returns True if the request is allowed, False if rate-limited."""
+        now = time.monotonic()
+        with self._lock:
+            # Evict expired timestamps
+            cutoff = now - self.window
+            while self._calls and self._calls[0] < cutoff:
+                self._calls.popleft()
+            
+            if len(self._calls) >= self.max_calls:
+                return False
+            
+            self._calls.append(now)
+            return True
+    
+    @property
+    def remaining(self) -> int:
+        """How many calls are left in the current window."""
+        now = time.monotonic()
+        with self._lock:
+            cutoff = now - self.window
+            active = sum(1 for t in self._calls if t >= cutoff)
+            return max(0, self.max_calls - active)
+
+
+# Usage:
+# limiter = RateLimiter(max_calls=100, window_seconds=60)
+# if limiter.allow():
+#     handle_request()
+# else:
+#     return 429, "Rate limit exceeded"`,
+
+    cache: `from functools import wraps
+from typing import Any, Callable, Dict, Optional, Tuple
+import time
+
+
+class TTLCache:
+    """Simple in-memory TTL cache."""
+    
+    def __init__(self, max_size: int = 128, ttl_seconds: float = 300) -> None:
+        self._cache: Dict[str, Tuple[Any, float]] = {}
+        self.max_size = max_size
+        self.ttl = ttl_seconds
+    
+    def get(self, key: str) -> Optional[Any]:
+        entry = self._cache.get(key)
+        if entry is None: return None
+        value, expires_at = entry
+        if time.monotonic() > expires_at:
+            del self._cache[key]; return None
+        return value
+    
+    def set(self, key: str, value: Any) -> None:
+        if len(self._cache) >= self.max_size:
+            # Evict oldest
+            oldest = min(self._cache, key=lambda k: self._cache[k][1])
+            del self._cache[oldest]
+        self._cache[key] = (value, time.monotonic() + self.ttl)
+    
+    def invalidate(self, key: str) -> bool:
+        return self._cache.pop(key, None) is not None
+
+
+def cached(ttl: float = 300) -> Callable:
+    """Decorator to cache function results by arguments."""
+    _cache = TTLCache(ttl_seconds=ttl)
+    def decorator(fn: Callable) -> Callable:
+        @wraps(fn)
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            key = str(args) + str(sorted(kwargs.items()))
+            hit = _cache.get(key)
+            if hit is not None: return hit
+            result = fn(*args, **kwargs)
+            _cache.set(key, result); return result
+        return wrapper
+    return decorator`,
+
+    classTemplate: `from __future__ import annotations
+from typing import Any, Optional
+
+
+class MyClass:
+    """
+    Template class following OMEGA patterns.
+    
+    Args:
+        name: Unique identifier for this instance.
+        config: Optional runtime configuration.
+    """
+    
+    _instances: dict = {}  # class-level registry
+    
+    def __init__(self, name: str, config: Optional[dict] = None) -> None:
+        self.name = name
+        self.config = config or {}
+        self._state: dict = {}
+        MyClass._instances[name] = self
+    
+    @classmethod
+    def get(cls, name: str) -> Optional['MyClass']:
+        """Retrieve instance by name."""
+        return cls._instances.get(name)
+    
+    @property
+    def is_ready(self) -> bool:
+        """True once state has been initialized."""
+        return bool(self._state)
+    
+    def configure(self, **kwargs: Any) -> 'MyClass':
+        """Fluent configuration. Returns self for chaining."""
+        self.config.update(kwargs)
+        return self
+    
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.name!r})"
+    
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, MyClass): return NotImplemented
+        return self.name == other.name`,
+
+    observer: `from __future__ import annotations
+from typing import Callable, Any, Dict, List
+
+
+class EventEmitter:
+    """Lightweight observer / event bus."""
+    
+    def __init__(self) -> None:
+        self._handlers: Dict[str, List[Callable]] = {}
+    
+    def on(self, event: str, handler: Callable) -> None:
+        """Subscribe to an event."""
+        self._handlers.setdefault(event, []).append(handler)
+    
+    def off(self, event: str, handler: Callable) -> None:
+        """Unsubscribe from an event."""
+        self._handlers.get(event, []).remove(handler)
+    
+    def emit(self, event: str, *args: Any, **kwargs: Any) -> None:
+        """Fire all handlers for an event."""
+        for handler in self._handlers.get(event, []):
+            handler(*args, **kwargs)
+    
+    def once(self, event: str, handler: Callable) -> None:
+        """Subscribe for a single emission."""
+        def _once(*args, **kwargs):
+            handler(*args, **kwargs)
+            self.off(event, _once)
+        self.on(event, _once)
+
+
+# Usage:
+# emitter = EventEmitter()
+# emitter.on('data', lambda d: print('Received:', d))
+# emitter.emit('data', {'key': 'value'})`,
+
+    decorator: `from functools import wraps
+from typing import Callable, Any
+import time, logging
+
+logger = logging.getLogger(__name__)
+
+
+def retry(max_attempts: int = 3, delay: float = 1.0, exceptions=(Exception,)):
+    """Retry a function on failure with exponential backoff."""
+    def decorator(fn: Callable) -> Callable:
+        @wraps(fn)
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            last_exc = None
+            for attempt in range(1, max_attempts + 1):
+                try:
+                    return fn(*args, **kwargs)
+                except exceptions as e:
+                    last_exc = e
+                    if attempt < max_attempts:
+                        sleep_time = delay * (2 ** (attempt - 1))
+                        logger.warning(f"{fn.__name__} failed (attempt {attempt}), retrying in {sleep_time:.1f}s")
+                        time.sleep(sleep_time)
+            raise last_exc
+        return wrapper
+    return decorator
+
+
+def timer(fn: Callable) -> Callable:
+    """Log function execution time."""
+    @wraps(fn)
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
+        start = time.perf_counter()
+        try:
+            result = fn(*args, **kwargs)
+            return result
+        finally:
+            elapsed = (time.perf_counter() - start) * 1000
+            logger.debug(f"{fn.__name__} completed in {elapsed:.2f}ms")
+    return wrapper
+
+
+# Usage:
+# @retry(max_attempts=3, delay=0.5)
+# @timer
+# def fetch_data(url: str) -> dict: ...`,
+
+    singleton: `class Singleton:
+    _instance = None
+    
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+    
+    def __init__(self, value: str = "") -> None:
+        if not hasattr(self, '_initialized'):
+            self.value = value
+            self._initialized = True`,
+
+    asyncHttp: `import asyncio
+import aiohttp
+from typing import Any, Optional
+
+
+async def fetch(session: aiohttp.ClientSession, url: str) -> dict:
+    """Fetch JSON from URL. Raises on HTTP errors."""
+    async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+        resp.raise_for_status()
+        return await resp.json()
+
+
+async def fetch_all(urls: list[str]) -> list[Any]:
+    """Concurrently fetch multiple URLs."""
+    async with aiohttp.ClientSession() as session:
+        tasks = [fetch(session, url) for url in urls]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+    return results
+
+
+async def post_json(url: str, payload: dict, headers: Optional[dict] = None) -> dict:
+    """POST JSON and return response."""
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, json=payload, headers=headers or {},
+                                timeout=aiohttp.ClientTimeout(total=15)) as resp:
+            resp.raise_for_status()
+            return await resp.json()
+
+
+if __name__ == '__main__':
+    urls = ['https://api.github.com', 'https://httpbin.org/get']
+    results = asyncio.run(fetch_all(urls))
+    for r in results:
+        print(r)`,
+
+    sort: `from typing import TypeVar, List
+
+T = TypeVar('T')
+
+
+def quicksort(arr: List[T]) -> List[T]:
+    """Quicksort — average O(n log n), worst O(n²)."""
+    if len(arr) <= 1:
+        return arr
+    pivot = arr[len(arr) // 2]
+    left = [x for x in arr if x < pivot]
+    middle = [x for x in arr if x == pivot]
+    right = [x for x in arr if x > pivot]
+    return quicksort(left) + middle + quicksort(right)
+
+
+def merge_sort(arr: List[T]) -> List[T]:
+    """Merge sort — guaranteed O(n log n), stable."""
+    if len(arr) <= 1:
+        return arr
+    mid = len(arr) // 2
+    left = merge_sort(arr[:mid])
+    right = merge_sort(arr[mid:])
+    return _merge(left, right)
+
+
+def _merge(left: List[T], right: List[T]) -> List[T]:
+    result, i, j = [], 0, 0
+    while i < len(left) and j < len(right):
+        if left[i] <= right[j]:
+            result.append(left[i]); i += 1
+        else:
+            result.append(right[j]); j += 1
+    return result + left[i:] + right[j:]`,
+
+    stack: `from typing import TypeVar, Generic, Optional, List
+
+T = TypeVar('T')
+
+
+class Stack(Generic[T]):
+    """LIFO stack — O(1) push, pop, peek."""
+    
+    def __init__(self) -> None:
+        self._data: List[T] = []
+    
+    def push(self, item: T) -> None:
+        self._data.append(item)
+    
+    def pop(self) -> T:
+        if not self._data:
+            raise IndexError("Pop from empty stack")
+        return self._data.pop()
+    
+    def peek(self) -> T:
+        if not self._data:
+            raise IndexError("Peek at empty stack")
+        return self._data[-1]
+    
+    def is_empty(self) -> bool:
+        return len(self._data) == 0
+    
+    def __len__(self) -> int:
+        return len(self._data)
+    
+    def __repr__(self) -> str:
+        return f"Stack({self._data!r})"`,
+
+    queue: `from collections import deque
+from typing import TypeVar, Generic, Deque
+
+T = TypeVar('T')
+
+
+class Queue(Generic[T]):
+    """FIFO queue — O(1) enqueue and dequeue."""
+    
+    def __init__(self) -> None:
+        self._data: Deque[T] = deque()
+    
+    def enqueue(self, item: T) -> None:
+        self._data.append(item)
+    
+    def dequeue(self) -> T:
+        if not self._data:
+            raise IndexError("Dequeue from empty queue")
+        return self._data.popleft()
+    
+    def peek(self) -> T:
+        if not self._data:
+            raise IndexError("Peek at empty queue")
+        return self._data[0]
+    
+    def is_empty(self) -> bool:
+        return len(self._data) == 0
+    
+    def __len__(self) -> int:
+        return len(self._data)`,
+  },
+
+  javascript: {
+    binarySearch: `/**
+ * Binary search in a sorted array.
+ * @param {Array} arr - Sorted array
+ * @param {*} target - Value to find
+ * @returns {number} Index or -1 if not found
+ */
+function binarySearch(arr, target) {
+  if (!arr?.length) return -1;
+  
+  let lo = 0, hi = arr.length - 1;
+  
+  while (lo <= hi) {
+    const mid = (lo + hi) >>> 1;  // unsigned right shift avoids overflow
+    if (arr[mid] === target) return mid;
+    if (arr[mid] < target) lo = mid + 1;
+    else hi = mid - 1;
+  }
+  
+  return -1;
+}
+
+// Test
+const data = [1, 3, 5, 7, 9, 11, 13];
+console.log(binarySearch(data, 7));   // 3
+console.log(binarySearch(data, 6));   // -1`,
+
+    asyncFetch: `/**
+ * Fetch JSON with timeout and error handling.
+ * @param {string} url
+ * @param {Object} options
+ * @returns {Promise<any>}
+ */
+async function fetchJSON(url, { timeout = 10000, ...options } = {}) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+  
+  try {
+    const res = await fetch(url, { signal: controller.signal, ...options });
+    
+    if (!res.ok) {
+      throw new Error(\`HTTP \${res.status}: \${res.statusText}\`);
+    }
+    
+    return await res.json();
+  } finally {
+    clearTimeout(id);
+  }
+}
+
+/**
+ * Fetch multiple URLs concurrently.
+ */
+async function fetchAll(urls) {
+  const results = await Promise.allSettled(urls.map(url => fetchJSON(url)));
+  return results.map(r => r.status === 'fulfilled' ? r.value : { error: r.reason.message });
+}
+
+// Usage:
+// const data = await fetchJSON('https://api.example.com/items');`,
+
+    singleton: `class Singleton {
+  static #instance = null;
+  #data = new Map();
+  
+  constructor() {
+    if (Singleton.#instance) return Singleton.#instance;
+    Singleton.#instance = this;
+  }
+  
+  static getInstance() {
+    return Singleton.#instance ?? new Singleton();
+  }
+  
+  set(key, value) { this.#data.set(key, value); return this; }
+  get(key) { return this.#data.get(key); }
+  has(key) { return this.#data.has(key); }
+  
+  toString() { return \`Singleton(size=\${this.#data.size})\`; }
+}`,
+
+    sort: `// QuickSort - Average O(n log n)
+function quickSort(arr) {
+  if (arr.length <= 1) return arr;
+  const pivot = arr[Math.floor(arr.length / 2)];
+  const left = arr.filter(x => x < pivot);
+  const mid  = arr.filter(x => x === pivot);
+  const right = arr.filter(x => x > pivot);
+  return [...quickSort(left), ...mid, ...quickSort(right)];
+}
+
+// MergeSort - Stable, guaranteed O(n log n)
+function mergeSort(arr) {
+  if (arr.length <= 1) return arr;
+  const mid = Math.floor(arr.length / 2);
+  const left = mergeSort(arr.slice(0, mid));
+  const right = mergeSort(arr.slice(mid));
+  return merge(left, right);
+}
+
+function merge(left, right) {
+  const result = [];
+  let i = 0, j = 0;
+  while (i < left.length && j < right.length) {
+    result.push(left[i] <= right[j] ? left[i++] : right[j++]);
+  }
+  return [...result, ...left.slice(i), ...right.slice(j)];
+}`,
+
+    todo: `class TodoManager {
+  #tasks = new Map();
+  
+  add(title, priority = 'medium') {
+    const id = crypto.randomUUID().slice(0, 8);
+    const task = { id, title: title.trim(), done: false, priority, createdAt: Date.now() };
+    this.#tasks.set(id, task);
+    return task;
+  }
+  
+  complete(id) {
+    const task = this.#tasks.get(id);
+    if (!task) return false;
+    task.done = true;
+    return true;
+  }
+  
+  delete(id) { return this.#tasks.delete(id); }
+  
+  pending() {
+    const order = { high: 3, medium: 2, low: 1 };
+    return [...this.#tasks.values()]
+      .filter(t => !t.done)
+      .sort((a, b) => order[b.priority] - order[a.priority]);
+  }
+  
+  get size() { return this.#tasks.size; }
+}`,
+
+    linkedList: `class Node {
+  constructor(value) {
+    this.value = value;
+    this.next = null;
+    this.prev = null;
+  }
+}
+
+class LinkedList {
+  #head = null;
+  #tail = null;
+  #size = 0;
+  
+  append(value) {
+    const node = new Node(value);
+    if (!this.#tail) { this.#head = this.#tail = node; }
+    else { node.prev = this.#tail; this.#tail.next = node; this.#tail = node; }
+    this.#size++;
+    return this;
+  }
+  
+  remove(value) {
+    let cur = this.#head;
+    while (cur) {
+      if (cur.value === value) {
+        if (cur.prev) cur.prev.next = cur.next; else this.#head = cur.next;
+        if (cur.next) cur.next.prev = cur.prev; else this.#tail = cur.prev;
+        this.#size--;
+        return true;
+      }
+      cur = cur.next;
+    }
+    return false;
+  }
+  
+  *[Symbol.iterator]() {
+    let cur = this.#head;
+    while (cur) { yield cur.value; cur = cur.next; }
+  }
+  
+  get size() { return this.#size; }
+  toString() { return \`LinkedList([\${[...this].join(' <-> ')}])\`; }
+}`,
+
+    stack: `class Stack {
+  #data = [];
+  
+  push(item) { this.#data.push(item); return this; }
+  pop() { if (this.isEmpty) throw new Error('Stack is empty'); return this.#data.pop(); }
+  peek() { if (this.isEmpty) throw new Error('Stack is empty'); return this.#data.at(-1); }
+  get isEmpty() { return this.#data.length === 0; }
+  get size() { return this.#data.length; }
+  toString() { return \`Stack([\${this.#data.join(', ')}])\`; }
+}`,
+  }
+};
+
+// ─── REFACTOR AGENT ───────────────────────────────────────────────────────────
+function doRefactor(text, code, lang) {
+  const target = code || text;
+  const issues = detectRefactorIssues(target, lang);
+  const refactored = refactorCode(target, lang);
+
+  let html = `<strong>🔄 Refactor Report — ${lang.toUpperCase()}</strong><br><br>`;
+
+  html += resultCard('🔎 Issues Detected',
+    issues.map(i => `<div class="issue-row">${severityBadge(i.sev)}<div><strong>${i.name}</strong><br><span style="color:var(--text3);font-size:12px;">${i.desc}</span></div></div>`).join('')
+  );
+
+  html += '<br><strong>Refactored Code:</strong>' + codeBlock(refactored, lang);
+
+  html += resultCard('📊 Improvements Made', `
+    <ul style="padding-left:16px;line-height:2;">
+      ${issues.map(i => `<li style="font-size:13px;"><strong>${i.fix}</strong></li>`).join('')}
+    </ul>`
+  );
+
+  return { html, text: `Refactor: ${lang}` };
+}
+
+function detectRefactorIssues(code, lang) {
+  const issues = [];
+  if (!code) return [{ sev:'info', name:'No code provided', desc:'Paste code to refactor.', fix:'N/A' }];
+
+  if (code.split('\n').length > 50) issues.push({ sev:'medium', name:'Long function', desc:'Function exceeds 50 lines — consider splitting', fix:'Split into focused sub-functions' });
+  if ((code.match(/if /g)||[]).length > 4) issues.push({ sev:'medium', name:'Deep nesting / many conditionals', desc:'High cyclomatic complexity detected', fix:'Extract condition logic into named functions' });
+  if ((code.match(/\t/g)||[]).length && (code.match(/    /g)||[]).length) issues.push({ sev:'high', name:'Mixed indentation', desc:'Both tabs and spaces detected', fix:'Standardize to 4-space indentation' });
+
+  if (lang === 'python') {
+    if (code.includes('print(') && !code.includes('if __name__')) issues.push({ sev:'low', name:'print() in library code', desc:'Use logging instead of print for production modules', fix:'Replace print() with logging.info/debug()' });
+    if ((code.match(/\.append\(/g)||[]).length > 3 && code.includes('for ')) issues.push({ sev:'low', name:'Loop with append', desc:'Prefer list comprehensions over for+append patterns', fix:'Convert to list comprehension' });
+  }
+  if (lang === 'javascript' || lang === 'typescript') {
+    if (code.includes('var ')) issues.push({ sev:'medium', name:'var declarations', desc:'var has function scope and causes hoisting bugs', fix:'Replace all var with const/let' });
+    if (code.includes('.then(') && !code.includes('async')) issues.push({ sev:'low', name:'Promise chains', desc:'Nested .then() chains reduce readability', fix:'Convert to async/await' });
+  }
+
+  if (!issues.length) issues.push({ sev:'info', name:'Clean code', desc:'No major structural issues found', fix:'Minor style polish applied' });
+
+  return issues;
+}
+
+function refactorCode(code, lang) {
+  if (!code || code.trim().length < 10) return '# Paste code above and I will refactor it';
+  let r = code;
+  if (lang === 'python') {
+    r = r.replace(/\bvar\b/g, '');
+    r = r.replace(/except:/g, 'except Exception as e:');
+    // Add type hints hint
+    if (r.includes('def ') && !r.includes('->') && !r.includes(': int') && !r.includes(': str')) {
+      r = '# Tip: Add type hints to all function parameters and return types\n' + r;
+    }
+  }
+  if (lang === 'javascript') {
+    r = r.replace(/\bvar\b/g, 'const');
+    r = r.replace(/==[^=]/g, m => '===' + m.slice(2));
+  }
+  return r;
+}
+
+// ─── EXPLAIN AGENT ────────────────────────────────────────────────────────────
+function doExplain(text, code, lang) {
+  const target = code || text;
+  const lines = (target || '').split('\n').filter(l => l.trim());
+  const explanation = explainCode(target, lang, lines);
+
+  let html = `<strong>📖 Code Explanation — ${lang.toUpperCase()}</strong><br><br>`;
+  html += `<p style="line-height:1.7;margin-bottom:12px;">${explanation.summary}</p>`;
+
+  if (explanation.sections.length) {
+    html += resultCard('🔍 Line-by-Line Breakdown',
+      explanation.sections.map(s =>
+        `<div class="issue-row">
+          <span class="inline-tag" style="font-size:10px;min-width:28px;text-align:center;">${s.line}</span>
+          <div>
+            <code style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent2);">${escHtml(s.code.slice(0,60))}${s.code.length>60?'…':''}</code><br>
+            <span style="color:var(--text2);font-size:12.5px;">${s.desc}</span>
+          </div>
+        </div>`
+      ).join('')
+    );
+  }
+
+  html += resultCard('💡 Key Concepts Used', `
+    <ul style="padding-left:16px;line-height:2.2;">
+      ${explanation.concepts.map(c => `<li style="font-size:13px;">${c}</li>`).join('')}
+    </ul>`
+  );
+
+  return { html, text: `Explain: ${lang}` };
+}
+
+function explainCode(code, lang, lines) {
+  const c = code || '';
+  const sections = [];
+
+  lines.slice(0, 12).forEach((line, i) => {
+    const s = line.trim();
+    if (!s || s.startsWith('#') || s.startsWith('//')) return;
+
+    let desc = '';
+    if (lang === 'python') {
+      if (s.startsWith('def ')) desc = `Defines a function named <strong>${s.match(/def (\w+)/)?.[1]||'?'}</strong>`;
+      else if (s.startsWith('class ')) desc = `Declares a class named <strong>${s.match(/class (\w+)/)?.[1]||'?'}</strong>`;
+      else if (s.startsWith('import ') || s.startsWith('from ')) desc = `Imports a module or specific names into scope`;
+      else if (s.startsWith('return ')) desc = `Returns a value from the current function`;
+      else if (s.startsWith('if ')) desc = `Conditional branch — executes the block if condition is True`;
+      else if (s.startsWith('for ')) desc = `Loop — iterates over a sequence`;
+      else if (s.startsWith('while ')) desc = `Loop — continues while condition remains True`;
+      else if (s.includes(' = ')) desc = `Assigns the result of the right side to variable <strong>${s.split('=')[0].trim()}</strong>`;
+      else if (s.startsWith('raise ')) desc = `Raises an exception — halts normal execution`;
+      else if (s.startsWith('try:')) desc = `Begins an error-handling block`;
+      else if (s.startsWith('except')) desc = `Catches exceptions from the try block`;
+      else desc = `Executes a statement or expression`;
+    } else {
+      if (s.startsWith('function ') || s.includes('=>')) desc = `Defines a function`;
+      else if (s.startsWith('class ')) desc = `Declares a class`;
+      else if (s.startsWith('const ') || s.startsWith('let ') || s.startsWith('var ')) desc = `Declares a variable`;
+      else if (s.startsWith('return ')) desc = `Returns a value from the function`;
+      else if (s.startsWith('if ') || s.startsWith('if(')) desc = `Conditional branch`;
+      else if (s.startsWith('for ') || s.startsWith('while ')) desc = `Loop structure`;
+      else if (s.startsWith('import ') || s.startsWith('require')) desc = `Imports a module`;
+      else desc = `Executes a statement`;
+    }
+
+    if (desc) sections.push({ line: i+1, code: line, desc });
+  });
+
+  const concepts = [];
+  if (c.includes('class ')) concepts.push('Object-Oriented Programming (OOP) — organizing code into reusable class blueprints');
+  if (c.includes('async') || c.includes('await')) concepts.push('Asynchronous programming — non-blocking execution for I/O tasks');
+  if (c.includes('def ') || c.includes('function ')) concepts.push('Functions — reusable named blocks that encapsulate logic');
+  if (c.includes('for ') || c.includes('while ')) concepts.push('Loops — repeating execution for iteration');
+  if (c.includes('try') && c.includes('except') || c.includes('try') && c.includes('catch')) concepts.push('Error handling — gracefully managing exceptions');
+  if (c.includes('import ') || c.includes('require')) concepts.push('Modules — organizing code into separate importable files');
+  if (c.includes('=>') || c.includes('lambda')) concepts.push('Lambda / Arrow functions — concise anonymous function expressions');
+  if (!concepts.length) concepts.push('Sequential execution — code runs top to bottom in order');
+  if (c.split('\n').length > 5) concepts.push(`${c.split('\n').length} lines of ${lang} code`);
+
+  const fnCount = (c.match(/def |function /g)||[]).length;
+  const summary = fnCount > 1
+    ? `This ${lang} code defines <strong>${fnCount} functions/methods</strong>. ${getSummaryByPattern(c, lang)}`
+    : getSummaryByPattern(c, lang);
+
+  return { summary, sections, concepts };
+}
+
+function getSummaryByPattern(code, lang) {
+  const c = code.toLowerCase();
+  if (c.includes('class ') && c.includes('def __init__')) return 'It defines a <strong>Python class</strong> with an initializer that sets up instance attributes when an object is created.';
+  if (c.includes('flask') || c.includes('@app.route')) return 'This is a <strong>Flask web route handler</strong> — it maps a URL path to a Python function that returns HTTP responses.';
+  if (c.includes('async') && c.includes('await')) return 'This code uses <strong>async/await</strong> for non-blocking I/O — functions marked <span class="inline-tag">async</span> can pause at <span class="inline-tag">await</span> points.';
+  if (c.includes('sorted(') || c.includes('quicksort') || c.includes('mergesort')) return 'This implements a <strong>sorting algorithm</strong> that arranges elements in a specified order.';
+  if (c.includes('binary_search') || (c.includes('lo') && c.includes('hi') && c.includes('mid'))) return 'This is a <strong>binary search algorithm</strong> that finds a value in O(log n) time by repeatedly halving the search space.';
+  if (c.includes('def ') || c.includes('function ')) return 'This code defines a <strong>function</strong> — a named, reusable block of logic that accepts input (parameters) and produces output (return value).';
+  return `This is a ${lang} code snippet that performs a sequence of operations.`;
+}
+
+// ─── TEST AGENT ───────────────────────────────────────────────────────────────
+function doTest(text, code, lang) {
+  const target = code || text;
+  const tests = generateTests(target, lang);
+
+  let html = `<strong>🧪 Generated Test Suite — ${lang.toUpperCase()}</strong><br><br>`;
+  html += resultCard('📋 Test Coverage Plan', `
+    <div class="plan-step"><div class="step-num">✓</div><div class="step-info"><div class="step-title">Happy path</div><div class="step-desc">Test normal expected inputs</div></div></div>
+    <div class="plan-step"><div class="step-num">✓</div><div class="step-info"><div class="step-title">Edge cases</div><div class="step-desc">Empty, None, zero, boundary values</div></div></div>
+    <div class="plan-step"><div class="step-num">✓</div><div class="step-info"><div class="step-title">Error handling</div><div class="step-desc">Invalid types, out-of-range inputs</div></div></div>
+    <div class="plan-step"><div class="step-num">✓</div><div class="step-info"><div class="step-title">Type validation</div><div class="step-desc">Ensure correct return types</div></div></div>
+  `);
+  html += '<br>' + codeBlock(tests, lang);
+  html += `<br><div style="color:var(--text3);font-size:12px;">💡 Run with: <span class="inline-tag">${lang === 'python' ? 'pytest test_module.py -v' : 'npm test'}</span></div>`;
+
+  return { html, text: `Tests: ${lang}` };
+}
+
+function generateTests(code, lang) {
+  const c = code || '';
+
+  if (lang === 'python') {
+    const fnMatch = c.match(/def (\w+)\(([^)]*)\)/);
+    const className = c.match(/class (\w+)/)?.[1];
+    const fnName = fnMatch?.[1] || 'my_function';
+    const params = fnMatch?.[2] || '';
+    const hasReturn = c.includes('return ');
+    const hasException = c.includes('raise ');
+
+    return `import pytest
+${className ? `from module import ${className}` : `from module import ${fnName}`}
+
+
+${className ? `class Test${className}:
+    
+    @pytest.fixture
+    def instance(self):
+        """Create fresh instance for each test."""
+        return ${className}()
+    
+    def test_initialization(self, instance):
+        """Test that ${className} initializes correctly."""
+        assert instance is not None
+    
+    def test_basic_operation(self, instance):
+        """Test core functionality works as expected."""
+        # TODO: add assertions based on your class methods
+        pass
+    
+    def test_repr(self, instance):
+        """Test string representation."""
+        result = repr(instance)
+        assert isinstance(result, str)
+        assert '${className}' in result` : ``}
+
+
+${!className ? `class Test${fnName[0].toUpperCase() + fnName.slice(1)}:
+    
+    def test_happy_path(self):
+        """Test normal expected input → correct output."""
+        # Arrange
+        # Act
+        # Assert
+        pass  # TODO: replace with: assert ${fnName}(valid_input) == expected_output
+    
+    def test_returns_correct_type(self):
+        """Verify return type is what callers expect."""
+        pass  # TODO: result = ${fnName}(...); assert isinstance(result, expected_type)
+    
+    def test_empty_input(self):
+        """Edge case: empty / falsy input."""
+        ${hasException ? `with pytest.raises((ValueError, TypeError)):
+            ${fnName}(${params ? '""' : ''})` : `result = ${fnName}(${params ? '""' : ''})
+        assert result is not None or result == []  # adjust to your contract`}
+    
+    def test_none_input(self):
+        """Edge case: None should raise TypeError or be handled gracefully."""
+        ${hasException || c.includes('if not') || c.includes('is None') ?
+          `with pytest.raises((TypeError, ValueError)):
+            ${fnName}(None)` :
+          `# Decide: should None be allowed or raise?
+        with pytest.raises(TypeError):
+            ${fnName}(None)`}
+    
+    def test_boundary_values(self):
+        """Test minimum and maximum edge values."""
+        pass  # TODO: test with 0, -1, empty list, very large number
+    
+    def test_idempotency(self):
+        """Calling twice with same input should give same result."""
+        pass  # TODO: assert ${fnName}(x) == ${fnName}(x)` : ``}
+
+
+# Run: pytest test_${fnName}.py -v --tb=short`;
+  }
+
+  // JavaScript
+  const fnMatch = c.match(/(?:function\s+(\w+)|const\s+(\w+)\s*=)/);
+  const fnName = fnMatch?.[1] || fnMatch?.[2] || 'myFunction';
+
+  return `import { ${fnName} } from './module.js';
+
+describe('${fnName}', () => {
+  
+  describe('Happy path', () => {
+    test('returns correct result for valid input', () => {
+      // TODO: const result = ${fnName}(validInput);
+      // expect(result).toBe(expectedValue);
+    });
+    
+    test('returns correct type', () => {
+      // const result = ${fnName}(input);
+      // expect(typeof result).toBe('expectedType');
+    });
+  });
+  
+  describe('Edge cases', () => {
+    test('handles empty input', () => {
+      // expect(${fnName}('')).not.toThrow();
+    });
+    
+    test('handles null input', () => {
+      expect(() => ${fnName}(null)).toThrow(TypeError);
+    });
+    
+    test('handles undefined', () => {
+      expect(() => ${fnName}(undefined)).toThrow();
+    });
+  });
+  
+  describe('Error handling', () => {
+    test('throws on invalid input type', () => {
+      expect(() => ${fnName}(123456789)).toThrow();
+    });
+    
+    test('throws with descriptive error message', () => {
+      expect(() => ${fnName}(null)).toThrow(/invalid|null|undefined/i);
+    });
+  });
+  
+  describe('Idempotency', () => {
+    test('same input always gives same output', () => {
+      // const a = ${fnName}(input);
+      // const b = ${fnName}(input);
+      // expect(a).toEqual(b);
+    });
+  });
+});`;
+}
+
+// ─── SPEC AGENT ───────────────────────────────────────────────────────────────
+function doSpec(text) {
+  const lower = text.toLowerCase();
+  let lang = 'python';
+  if (lower.includes('node') || lower.includes('express') || lower.includes('react')) lang = 'javascript';
+  if (lower.includes('typescript')) lang = 'typescript';
+
+  const design = buildSystemDesign(text);
+  const code = buildFromSpec(text, lang);
+
+  let html = `<strong>📋 Spec → Code</strong><br><br>`;
+  html += `<p style="color:var(--text2);margin-bottom:12px;line-height:1.6;">${design.overview}</p>`;
+
+  html += resultCard('🏗️ System Design', design.components.map((c,i) =>
+    `<div class="plan-step">
+      <div class="step-num">${i+1}</div>
+      <div class="step-info">
+        <div class="step-title">${c.name}</div>
+        <div class="step-desc">${c.desc}</div>
+      </div>
+    </div>`
+  ).join(''));
+
+  html += '<br><strong>Implementation:</strong>' + codeBlock(code, lang);
+
+  html += resultCard('📦 Next Steps', `
+    <ul style="padding-left:16px;line-height:2.2;">
+      <li>Write unit tests using the <strong>Test Generator</strong></li>
+      <li>Review the code in <strong>Code Review</strong> mode</li>
+      <li>Deploy behind an auth layer and rate limiter</li>
+      <li>Add observability: logging, metrics, and health checks</li>
+    </ul>`
+  );
+
+  return { html, text: `Spec: ${text.slice(0,40)}` };
+}
+
+function buildSystemDesign(spec) {
+  const lower = spec.toLowerCase();
+  const components = [];
+  let overview = '';
+
+  if (lower.includes('url shortener')) {
+    overview = 'A URL shortener maps long URLs to short codes and redirects visitors. Core requirements: unique code generation, fast redirect lookup, optional analytics.';
+    components.push(
+      { name: 'URL Registry', desc: 'Maps short codes → original URLs. In-memory dict or Redis for production.' },
+      { name: 'Code Generator', desc: 'Generates unique 6–8 char alphanumeric codes using base62 encoding.' },
+      { name: 'Redirect Handler', desc: 'Looks up code and returns 301/302 redirect, increments visit counter.' },
+      { name: 'Analytics Store', desc: 'Records visit time, IP, referrer for each short URL.' },
+    );
+  } else if (lower.includes('auth') || lower.includes('login') || lower.includes('jwt')) {
+    overview = 'An authentication module handles user identity: registration, login, JWT token issuance, and protected route middleware.';
+    components.push(
+      { name: 'User Store', desc: 'Stores hashed credentials (bcrypt). Never store plain passwords.' },
+      { name: 'Auth Service', desc: 'register(), login(), refresh_token() — pure business logic.' },
+      { name: 'JWT Manager', desc: 'Issues signed access tokens (15min) and refresh tokens (7 days).' },
+      { name: 'Auth Middleware', desc: 'Validates Bearer token on protected routes, injects user context.' },
+    );
+  } else if (lower.includes('job queue') || lower.includes('task queue') || lower.includes('worker')) {
+    overview = 'A job queue decouples task submission from execution, enabling background processing and retry logic.';
+    components.push(
+      { name: 'Job Queue', desc: 'Thread-safe FIFO queue. Each job has id, payload, status, and retry count.' },
+      { name: 'Worker Pool', desc: 'N worker threads pull jobs from the queue and execute handlers.' },
+      { name: 'Job Registry', desc: 'Maps job type strings to handler functions.' },
+      { name: 'Retry Policy', desc: 'Failed jobs are re-enqueued with exponential backoff up to max_retries.' },
+    );
+  } else if (lower.includes('rate limit')) {
+    overview = 'A rate limiter controls how many requests a client can make in a time window, preventing abuse.';
+    components.push(
+      { name: 'Sliding Window Counter', desc: 'Tracks timestamps of recent requests per client key.' },
+      { name: 'Policy Store', desc: 'Per-route or per-user limits (max_calls, window_seconds).' },
+      { name: 'Middleware', desc: 'Checks limit on each request, returns 429 with Retry-After on breach.' },
+      { name: 'Cleanup', desc: 'Evicts expired timestamps to prevent memory leaks.' },
+    );
+  } else {
+    overview = `Building: "${spec.slice(0,100)}". Breaking this into clean, modular components following OMEGA\'s service-repository pattern.`;
+    components.push(
+      { name: 'Data Layer', desc: 'Models and schema definitions for the domain.' },
+      { name: 'Service Layer', desc: 'Business logic, validation, and orchestration.' },
+      { name: 'Interface Layer', desc: 'API routes, CLI, or event handlers.' },
+      { name: 'Error Handling', desc: 'Consistent error types and recovery paths.' },
+    );
+  }
+
+  return { overview, components };
+}
+
+function buildFromSpec(spec, lang) {
+  const lower = spec.toLowerCase();
+
+  if (lower.includes('url shortener')) {
+    return `import hashlib
+import time
+from dataclasses import dataclass, field
+from typing import Optional
+
+
+@dataclass
+class ShortURL:
+    original: str
+    code: str
+    created_at: float = field(default_factory=time.time)
+    visits: int = 0
+
+
+class URLShortener:
+    """Production URL shortener with analytics."""
+    
+    BASE62 = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    
+    def __init__(self, base_url: str = 'https://short.ly') -> None:
+        self.base_url = base_url.rstrip('/')
+        self._store: dict[str, ShortURL] = {}
+        self._reverse: dict[str, str] = {}  # original → code
+    
+    def shorten(self, url: str) -> str:
+        """Shorten a URL. Returns the same code for duplicates."""
+        url = url.strip()
+        if not url.startswith(('http://', 'https://')):
+            raise ValueError(f"Invalid URL: {url!r}")
+        
+        if url in self._reverse:
+            return f"{self.base_url}/{self._reverse[url]}"
+        
+        code = self._generate_code(url)
+        entry = ShortURL(original=url, code=code)
+        self._store[code] = entry
+        self._reverse[url] = code
+        return f"{self.base_url}/{code}"
+    
+    def resolve(self, code: str) -> Optional[str]:
+        """Resolve a short code to the original URL."""
+        entry = self._store.get(code)
+        if entry:
+            entry.visits += 1
+            return entry.original
+        return None
+    
+    def analytics(self, code: str) -> Optional[dict]:
+        """Return analytics for a short URL."""
+        entry = self._store.get(code)
+        if not entry:
+            return None
+        return {'code': code, 'original': entry.original, 'visits': entry.visits,
+                'created_at': entry.created_at, 'short_url': f"{self.base_url}/{code}"}
+    
+    def _generate_code(self, url: str, length: int = 7) -> str:
+        h = int(hashlib.sha256(f"{url}{time.time()}".encode()).hexdigest(), 16)
+        code = ''
+        while h and len(code) < length:
+            h, r = divmod(h, 62)
+            code += self.BASE62[r]
+        return code.ljust(length, '0')
+
+
+# Usage:
+# s = URLShortener()
+# short = s.shorten('https://very-long-url.com/with/lots/of/path')
+# print(s.resolve(short.split('/')[-1]))  # original URL`;
+  }
+
+  if (lower.includes('auth') || lower.includes('jwt')) {
+    return `import hashlib, os, time, json, base64, hmac
+from dataclasses import dataclass
+from typing import Optional
+
+
+@dataclass
+class User:
+    id: str
+    username: str
+    password_hash: str
+
+
+class AuthService:
+    """Minimal JWT-like auth service. Use python-jose in production."""
+    
+    SECRET = os.environ.get('AUTH_SECRET', 'change-in-production')
+    
+    def __init__(self) -> None:
+        self._users: dict[str, User] = {}
+    
+    def register(self, username: str, password: str) -> User:
+        username = username.strip().lower()
+        if username in self._users:
+            raise ValueError(f"Username {username!r} already taken")
+        if len(password) < 8:
+            raise ValueError("Password must be at least 8 characters")
+        
+        salt = os.urandom(16).hex()
+        hashed = self._hash(password, salt)
+        user = User(id=os.urandom(8).hex(), username=username, password_hash=f"{salt}:{hashed}")
+        self._users[username] = user
+        return user
+    
+    def login(self, username: str, password: str) -> str:
+        user = self._users.get(username.strip().lower())
+        if not user:
+            raise PermissionError("Invalid credentials")
+        salt, stored = user.password_hash.split(':', 1)
+        if not hmac.compare_digest(self._hash(password, salt), stored):
+            raise PermissionError("Invalid credentials")
+        return self._issue_token(user)
+    
+    def verify_token(self, token: str) -> Optional[dict]:
+        try:
+            parts = token.split('.')
+            if len(parts) != 3:
+                return None
+            header, payload, sig = parts
+            expected = self._sign(f"{header}.{payload}")
+            if not hmac.compare_digest(sig, expected):
+                return None
+            data = json.loads(base64.urlsafe_b64decode(payload + '=='))
+            if data['exp'] < time.time():
+                return None
+            return data
+        except Exception:
+            return None
+    
+    def _issue_token(self, user: User, ttl: int = 3600) -> str:
+        header = base64.urlsafe_b64encode(b'{"alg":"HS256"}').decode().rstrip('=')
+        payload = base64.urlsafe_b64encode(json.dumps({
+            'sub': user.id, 'username': user.username, 'exp': time.time() + ttl
+        }).encode()).decode().rstrip('=')
+        sig = self._sign(f"{header}.{payload}")
+        return f"{header}.{payload}.{sig}"
+    
+    def _sign(self, data: str) -> str:
+        return hmac.new(self.SECRET.encode(), data.encode(), hashlib.sha256).hexdigest()
+    
+    def _hash(self, password: str, salt: str) -> str:
+        return hashlib.pbkdf2_hmac('sha256', password.encode(), salt.encode(), 100_000).hex()`;
+  }
+
+  // Generic spec → code
+  return generateGenericCode(spec, lang);
+}
+
+// ─── CHAT AGENT ───────────────────────────────────────────────────────────────
+function doChat(text, code, lang, history) {
+  const lower = text.toLowerCase();
+  const prev = history.slice(-4).map(m => m.content).join(' ').toLowerCase();
+
+  // Context-aware responses
+  if (lower.includes('hello') || lower.includes('hi') || lower.includes('hey')) {
+    return { html: `Hey! I'm OMEGA — your all-in-one coding agent. I can <strong>generate</strong>, <strong>review</strong>, <strong>debug</strong>, <strong>refactor</strong>, <strong>explain</strong>, and <strong>test</strong> code — no external API needed.<br><br>What are you building today?`, text: 'greeting' };
+  }
+
+  if (lower.includes('what can you do') || lower.includes('help me') || lower.includes('what do you')) {
+    return { html: `I'm capable of all 8 coding agent modes:<br><br>
+      <div class="result-card">
+        ${[
+          ['🔍','Code Review','Paste code → get bugs, style issues, improvements'],
+          ['🐛','Debugger','Broken code + error → root cause & fix'],
+          ['⚡','Code Generator','Describe what you want → production code'],
+          ['🔄','Refactor Engine','Messy code → clean, optimized code'],
+          ['📖','Code Explainer','Any code → clear explanation'],
+          ['🧪','Test Generator','Function → full unit test suite'],
+          ['📋','Spec → Code','English spec → full implementation'],
+          ['💬','Chat','Multi-turn assistant — I\'m here now!'],
+        ].map(([icon,name,desc]) =>
+          `<div class="issue-row"><span style="font-size:18px;width:28px;">${icon}</span><div><strong>${name}</strong><br><span style="color:var(--text3);font-size:12px;">${desc}</span></div></div>`
+        ).join('')}
+      </div>
+      Switch modes using the buttons at the top, or just ask me anything!`, text: 'capabilities' };
+  }
+
+  if (lower.match(/\b(how|what|why|when|where|explain|tell me|what is|what are)\b/)) {
+    return doExplain(text, code, lang);
+  }
+
+  if (lower.includes('fix') || lower.includes('error') || lower.includes('bug') || lower.includes('broken')) {
+    return doDebug(text, code, lang);
+  }
+
+  if (lower.includes('write') || lower.includes('create') || lower.includes('build') || lower.includes('generate') || lower.includes('make a')) {
+    return doGenerate(text, lang);
+  }
+
+  if (lower.includes('refactor') || lower.includes('clean') || lower.includes('improve') || lower.includes('optimize')) {
+    return doRefactor(text, code, lang);
+  }
+
+  if (lower.includes('test') || lower.includes('unit test') || lower.includes('spec')) {
+    return doTest(text, code, lang);
+  }
+
+  if (code) {
+    return doReview(text, code, lang);
+  }
+
+  // Catch-all with good response
+  const followUp = history.length > 2 ? ' What would you like to do next?' : '';
+  const topics = [
+    { k: ['async','await','promise','concurrent'], r: `<strong>Async Programming</strong><br><br>Async/await lets you write non-blocking code that looks synchronous. When you <span class="inline-tag">await</span> a promise/coroutine, execution pauses <em>only in that function</em> — the event loop can handle other work.<br><br>${lang === 'python' ? codeBlock(`import asyncio\n\nasync def fetch_data():\n    await asyncio.sleep(1)  # non-blocking wait\n    return {'data': 'value'}\n\nasync def main():\n    result = await fetch_data()  # waits for fetch_data\n    print(result)\n\nasyncio.run(main())`, 'python') : codeBlock(`async function fetchData() {\n  const res = await fetch('/api/data');\n  return res.json();\n}\n\nfetchData().then(console.log);`, 'javascript')}` },
+    { k: ['closure','scope','lexical'], r: `<strong>Closures</strong><br><br>A closure is a function that "remembers" variables from its enclosing scope, even after that scope has finished executing.<br><br>${codeBlock(`def make_counter(start=0):\n    count = [start]  # mutable so inner fn can modify\n    def increment():\n        count[0] += 1\n        return count[0]\n    return increment\n\ncounter = make_counter(10)\nprint(counter())  # 11\nprint(counter())  # 12`, 'python')}` },
+    { k: ['generator','yield','iterator'], r: `<strong>Generators & yield</strong><br><br>Generators produce values lazily — they don't compute all values upfront. Memory-efficient for large sequences.<br><br>${codeBlock(`def fibonacci():\n    a, b = 0, 1\n    while True:\n        yield a\n        a, b = b, a + b\n\nfib = fibonacci()\nprint([next(fib) for _ in range(8)])  # [0,1,1,2,3,5,8,13]`, 'python')}` },
+    { k: ['decorator','@','wrapper'], r: `<strong>Decorators</strong><br><br>A decorator wraps a function to add behavior before/after it runs — without modifying the original function.<br><br>${codeBlock(`from functools import wraps\nimport time\n\ndef timer(fn):\n    @wraps(fn)  # preserve fn's name & docstring\n    def wrapper(*args, **kwargs):\n        start = time.perf_counter()\n        result = fn(*args, **kwargs)\n        end = time.perf_counter()\n        print(f"{fn.__name__} took {(end-start)*1000:.2f}ms")\n        return result\n    return wrapper\n\n@timer\ndef slow_fn():\n    time.sleep(0.1)`, 'python')}` },
+  ];
+
+  for (const { k, r } of topics) {
+    if (k.some(kw => lower.includes(kw))) {
+      return { html: r + `<br><div style="color:var(--text3);font-size:12px;">💬 Ask a follow-up or switch modes for code generation/review.</div>`, text: k[0] };
+    }
+  }
+
+  return {
+    html: `Got it — let me think about: <em>"${escHtml(text.slice(0,80))}"</em><br><br>
+    For the best result, try switching to a specialized mode:<br><br>
+    <div class="result-card">
+      <div class="issue-row"><span class="inline-tag">Generate</span> <span style="color:var(--text2);">→ if you want code written from scratch</span></div>
+      <div class="issue-row"><span class="inline-tag">Review</span> <span style="color:var(--text2);">→ if you have code to audit</span></div>
+      <div class="issue-row"><span class="inline-tag">Debug</span> <span style="color:var(--text2);">→ if you have an error to fix</span></div>
+      <div class="issue-row"><span class="inline-tag">Explain</span> <span style="color:var(--text2);">→ if you want code explained</span></div>
+    </div>
+    Or just paste your code below — I'll auto-detect what you need.${followUp}`,
+    text: 'general'
+  };
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+document.getElementById('inputBox').focus();
+</script>
+</body>
+</html>
